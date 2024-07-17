@@ -1,6 +1,6 @@
 import React from 'react'
 import { IoIosClose } from "react-icons/io";
-import UserInfo from './subComponents/UserInfo';
+import UserInfo from './listComponents/UserInfo';
 
 
 const List = () => {

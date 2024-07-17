@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
-import ChatHead from './subComponents/ChatHead'
+import ChatHead from './chatComponents/ChatHead'
 import { IoImage, IoCamera, IoMic, IoApps, IoSend, IoLogoOctocat } from "react-icons/io5";
-import YouChat from './subComponents/YouChat';
+import YouChat from './chatComponents/YouChat';
 import EmojiPicker from 'emoji-picker-react';
+import { SkinTones } from 'emoji-picker-react';
 
 const Chat = () => {
   const textPlaceRef = useRef(null);
-  const [emojiOpen, setEmojiOpen] = useState(true)
+  const [emojiOpen, setEmojiOpen] = useState(false)
   const [typeText, setTypeText] = useState('')
 
   const handleEmoji = (e) => {
@@ -57,7 +58,7 @@ const Chat = () => {
           <button className='btn btn-ghost'><IoCamera size={24} /></button>
           <button className='btn btn-ghost'><IoMic size={24} /></button>
         </div>
-        <div className="flex items-center px-3 py-1 bg-base-200 rounded-md w-[50%] lg:w-[60%] relative">
+        <div className="flex items-center px-3 py-1 bg-base-200 rounded-md w-[50%] lg:w-[70%] relative">
           <textarea
             className='bg-transparent text-base outline-none w-full h-auto resize-none leading-snug p-2'
             placeholder='Type a message'
@@ -75,10 +76,12 @@ const Chat = () => {
           <div className="absolute bottom-16 right-1">
             <EmojiPicker
               onEmojiClick={handleEmoji}
+              onSkinToneChange={SkinTones}
               pickerStyle={{
                 boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.2)',
                 borderRadius: '10px',
                 zIndex: 50,
+                background: 'transparent'
               }}
             />
           </div>

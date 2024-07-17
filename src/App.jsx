@@ -15,7 +15,7 @@ const App = () => {
             <div className=" w-[70%] gap-2">
               <Chat />
             </div>
-            <div className=" w-[30%] border-2">
+            <div className=" w-[30%] border-s-2">
               <Detail />
             </div>
           </div>
