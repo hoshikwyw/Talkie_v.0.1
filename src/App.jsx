@@ -8,7 +8,7 @@ const App = () => {
   return (
     <div data-theme="lemonade" className=' min-w-screen min-h-screen'>
       <div className="drawer">
-        <input id="my-drawer" type="checkbox" className="drawer-toggle border-2 border-red-900 visible" />
+        <input id="my-drawer" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content">
           {/* Page content here */}
           <Navbar />
