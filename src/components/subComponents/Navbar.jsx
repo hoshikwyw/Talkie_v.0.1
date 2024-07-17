@@ -5,7 +5,7 @@ import { IoIosMenu } from "react-icons/io";
 
 const Navbar = () => {
     return (
-        <div className="navbar bg-base-100 border-2">
+        <div className="navbar bg-base-100 shadow-sm">
             <label htmlFor="my-drawer" className="btn btn-ghost btn-primary drawer-button"><IoIosMenu size={30} /></label>
             <div className="flex-1">
                 <a className="btn btn-ghost text-xl">Talkie</a>
