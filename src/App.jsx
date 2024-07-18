@@ -8,7 +8,6 @@ const App = () => {
     <div data-theme="lemonade" className=' min-w-screen min-h-screen relative'>
       <Paths />
       <NotiAlert />
-
     </div>
   )
 }

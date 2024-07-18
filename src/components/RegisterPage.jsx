@@ -10,7 +10,7 @@ const RegisterPage = () => {
         setProfile({ file: e.target.files[0], url: URL.createObjectURL(e.target.files[0]) })
     }
     return (
-        <div className=' flex w-full justify-center items-center flex-col min-h-screen gap-3'>
+        <div className=' flex w-full justify-center items-center flex-col min-h-screen gap-3 overflow-hidden'>
             <h1 className=' font-bold text-2xl'>Welcome To</h1>
             <h1 className=' font-semibold text-lg'>Walkie Talkie</h1>
             <form action="" className=' flex justify-center items-center flex-col gap-3'>
