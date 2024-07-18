@@ -1,11 +1,14 @@
 import React from 'react'
 import Paths from './components/Paths'
+import NotiAlert from './components/subComponents/NotiAlert'
 
 
 const App = () => {
   return (
-    <div data-theme="lemonade" className=' min-w-screen min-h-screen'>
+    <div data-theme="lemonade" className=' min-w-screen min-h-screen relative'>
       <Paths />
+      <NotiAlert />
+
     </div>
   )
 }
