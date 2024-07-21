@@ -6,7 +6,7 @@ import List from './List'
 import Login from './Login'
 
 const Home = () => {
-    const user = true
+    const user = false
     return (
         <div data-theme="lemonade" className=' min-w-screen min-h-screen'>
             {user ? (
