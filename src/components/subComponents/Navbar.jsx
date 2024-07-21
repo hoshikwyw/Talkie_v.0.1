@@ -1,9 +1,13 @@
 import React from 'react'
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { IoIosMenu } from "react-icons/io";
+import { auth } from '../../lib/firebase';
+import { useUserStore } from '../../lib/userStore';
 
 
 const Navbar = () => {
+    const { currentUser } = useUserStore()
+    console.log(currentUser);
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <label htmlFor="my-drawer" className="btn btn-ghost btn-primary drawer-button"><IoIosMenu size={30} /></label>
@@ -30,7 +34,7 @@ const Navbar = () => {
                         <div className="w-10 rounded-full">
                             <img
                                 alt="Tailwind CSS Navbar component"
-                                src="/pfp.jpg" />
+                                src={currentUser?.profile || "/pfp.jpg"} />
                         </div>
                     </div>
                     <ul
@@ -43,7 +47,7 @@ const Navbar = () => {
                             </a>
                         </li>
                         <li><a>Settings</a></li>
-                        <li><a>Logout</a></li>
+                        <li><button onClick={() => { auth.signOut() }}>Logout</button></li>
                     </ul>
                 </div>
             </div>
