@@ -7,7 +7,7 @@ import { useUserStore } from '../../lib/userStore';
 
 const Navbar = () => {
     const { currentUser } = useUserStore()
-    console.log(currentUser);
+    // console.log(currentUser);
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <label htmlFor="my-drawer" className="btn btn-ghost btn-primary drawer-button"><IoIosMenu size={30} /></label>

@@ -26,9 +26,9 @@ const Chat = () => {
     <div className='grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.5rem)] relative'> {/* Using grid layout to handle the height distribution */}
       <ChatHead
         name="Halsey"
-        avatar="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+        avatar=""
         status="online"
-        className="h-16"
+        className="h-20"
       />
       <div
         ref={textPlaceRef}
