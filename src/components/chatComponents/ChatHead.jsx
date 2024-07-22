@@ -1,14 +1,13 @@
 import React from 'react'
 import { IoIosCall, IoIosVideocam, IoIosMore } from "react-icons/io";
+import Avatar from '../listComponents/Avatar';
 
 
 const ChatHead = ({ name, avatar, status }) => {
     return (
         <div className="navbar bg-base-100 w-full flex justify-between shadow-md">
-            <div className="avatar gap-5 flex justify-center items-center">
-                <div className="w-14 rounded-full">
-                    <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                </div>
+            <div className=" gap-5 flex justify-center items-center px-3">
+                <Avatar avatar={avatar} name={name} status={status} />
                 <div className=" flex flex-col justify-start">
                     <p className=" text-xl font-semibold">{name}</p>
                     <p className=' font-semibold text-sm'>{status}</p>
