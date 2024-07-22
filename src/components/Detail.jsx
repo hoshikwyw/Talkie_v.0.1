@@ -8,7 +8,7 @@ const Detail = () => {
   return (
     <div>
       <UserCard name="Halsey" avatar="/user.jpg" status="online" />
-      <div className="">
+      <div className=" z-10">
         <ChatSettings />
         <SharedFiles />
         <SharedImgs />

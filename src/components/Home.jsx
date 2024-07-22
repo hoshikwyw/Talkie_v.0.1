@@ -21,7 +21,7 @@ const Home = () => {
     if (isLoading) return <div className=" loading absolute top-[40%] left-[50%] size-14 justify-center flex items-center">Loading...</div>;
 
     return (
-        <div data-theme="lemonade" className=' min-w-screen min-h-screen'>
+        <div data-theme="nord" className=' min-w-screen min-h-screen'>
             {currentUser ? (
                 <div className="drawer">
                     <input id="my-drawer" type="checkbox" className="drawer-toggle" />
@@ -31,7 +31,7 @@ const Home = () => {
                             <div className=" w-[70%] gap-2">
                                 <Chat />
                             </div>
-                            <div className=" w-[30%] border-s-2">
+                            <div className=" w-[30%] bg-base-200">
                                 <Detail />
                             </div>
                         </div>
