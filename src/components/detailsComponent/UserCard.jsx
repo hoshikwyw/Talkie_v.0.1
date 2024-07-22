@@ -2,7 +2,7 @@ import React from 'react'
 
 const UserCard = ({ name, avatar, status }) => {
     return (
-        <div className=' flex flex-col justify-center items-center py-2 border-b-2'>
+        <div className=' flex flex-col justify-center items-center py-2 bg-base-300'>
             <div className="avatar">
                 <div className=" w-32 rounded-full">
                     <img src={avatar} />

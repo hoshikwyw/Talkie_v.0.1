@@ -8,7 +8,7 @@ const YouChat = (props) => {
         <div>
             <div className="chat chat-start">
                 <div className="chat-image avatar">
-                    <Avatar avatar="" name="Halsey" />
+                    <Avatar avatar="" name="Halsey" status="online" />
                 </div>
                 <div className="chat-header">
                     Obi-Wan Kenobi

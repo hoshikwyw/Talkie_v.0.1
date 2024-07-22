@@ -10,7 +10,7 @@ const Navbar = () => {
     // console.log(currentUser);
     return (
         <div className="navbar bg-base-100 shadow-sm">
-            <label htmlFor="my-drawer" className="btn btn-ghost btn-primary drawer-button"><IoIosMenu size={30} /></label>
+            <label htmlFor="my-drawer" className="btn btn-ghost btn-circle btn-primary drawer-button"><IoIosMenu size={30} /></label>
             <div className="flex-1">
                 <a className="btn btn-ghost text-xl">Talkie</a>
             </div>
