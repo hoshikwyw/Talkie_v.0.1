@@ -19,7 +19,6 @@ const Chat = () => {
   useEffect(() => {
     if (textPlaceRef.current) {
       textPlaceRef.current.scrollTop = textPlaceRef.current.scrollHeight;
-      console.log(textPlaceRef.current.scrollTop);
     }
   }, []);
 
@@ -33,10 +32,8 @@ const Chat = () => {
       />
       <div
         ref={textPlaceRef}
-        className=" overflow-y-auto p-5 textPlace"
+        className=" p-5 overflow-y-scroll no-scrollbar"
       >
-        <YouChat />
-        <YouChat />
         <YouChat />
       </div>
       <div className="flex items-end justify-between px-3 py-2 bg-base-300">
