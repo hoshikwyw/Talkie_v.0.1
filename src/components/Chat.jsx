@@ -4,26 +4,35 @@ import { IoImage, IoCamera, IoMic, IoApps, IoSend, IoLogoOctocat } from "react-i
 import YouChat from './chatComponents/YouChat';
 import EmojiPicker from 'emoji-picker-react';
 import { SkinTones } from 'emoji-picker-react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const Chat = () => {
   const textPlaceRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [typeText, setTypeText] = useState('')
+  const [chat, setChat] = useState()
 
   const handleEmoji = (e) => {
     setTypeText(prev => prev + e.emoji)
     setEmojiOpen(false)
   }
 
-  // Scroll to the bottom when the component mounts or updates
   useEffect(() => {
     if (textPlaceRef.current) {
       textPlaceRef.current.scrollTop = textPlaceRef.current.scrollHeight;
     }
   }, []);
 
+  useEffect(() => {
+    const unSub = onSnapshot(doc(db, "chats", "dhOdrMEPCRVKYEtu4gJPrGsxocj1"), (res) => {
+      setChat(res.data())
+    })
+    return () => { unSub() }
+  }, [])
+
   return (
-    <div className=' grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.4rem)] relative'> 
+    <div className=' grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.4rem)] relative'>
       <ChatHead
         name="Halsey"
         avatar=""
