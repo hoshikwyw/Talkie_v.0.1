@@ -7,6 +7,7 @@ import Login from './Login'
 import { useUserStore } from '../lib/userStore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../lib/firebase'
+import SideList from './listComponents/SideList'
 
 const Home = () => {
     const { currentUser, isLoading, fetchUserInfo } = useUserStore()
@@ -28,15 +29,18 @@ const Home = () => {
                     <div className="drawer-content">
                         <Navbar />
                         <div className=" flex w-full mt-1">
-                            <div className=" w-[70%] gap-2">
+                            <div className=" w-[20%] bg-base-300 shadow-md hidden lg:block">
+                                <SideList />
+                            </div>
+                            <div className=" w-[70%] lg:w-[60%] gap-2">
                                 <Chat />
                             </div>
-                            <div className=" w-[30%] bg-base-200">
+                            <div className=" w-[30%] lg:w-[20%] bg-base-200">
                                 <Detail />
                             </div>
                         </div>
                     </div>
-                    <div className="drawer-side">
+                    <div className="drawer-side z-30">
                         <List />
                     </div>
                 </div>
