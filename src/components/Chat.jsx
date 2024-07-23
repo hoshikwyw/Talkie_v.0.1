@@ -23,7 +23,7 @@ const Chat = () => {
   }, []);
 
   return (
-    <div className='grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.5rem)] relative'> {/* Using grid layout to handle the height distribution */}
+    <div className=' grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.4rem)] relative'> 
       <ChatHead
         name="Halsey"
         avatar=""

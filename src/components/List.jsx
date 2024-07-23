@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { IoIosClose, IoMdSearch } from "react-icons/io";
 import UserInfo from './listComponents/UserInfo';
 import { useUserStore } from '../lib/userStore';
-import { doc, getDoc, getDocs, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import AddUser from './listComponents/AddUser';
 
@@ -47,8 +47,8 @@ const List = () => {
                     <label onClick={() => setModalOpen(true)} htmlFor="my_modal_7" className=" bg-base-300 rounded-md px-2 text-[12px] font-semibold py-2">Add</label>
                 </div>
                 <li className=' w-full overflow-hidden'>
-                    {chatList.map((chat) => (
-                        <UserInfo name={chat.user.username} avatar={chat.user.profile || ""} lastMessage="Hello, how are you?" status="online" />
+                    {chatList.map((chat,index) => (
+                        <UserInfo key={index} name={chat.user.username} avatar={chat.user.profile || ""} lastMessage="Hello, how are you?" status="online" />
                     ))}
                 </li>
             </ul>
