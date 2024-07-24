@@ -8,9 +8,12 @@ import { useUserStore } from '../lib/userStore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import SideList from './listComponents/SideList'
+import { useChatStore } from '../lib/chatStore'
 
 const Home = () => {
     const { currentUser, isLoading, fetchUserInfo } = useUserStore()
+    const { chatId } = useChatStore()
+    // console.log(chatId);
 
     useEffect(() => {
         const unSub = onAuthStateChanged(auth, (user) => {
@@ -33,10 +36,10 @@ const Home = () => {
                                 <SideList />
                             </div>
                             <div className=" w-full md:w-[70%] lg:w-[50%]">
-                                <Chat />
+                                {chatId && (<Chat />)}
                             </div>
                             <div className=" w-[30%] lg:w-[25%] bg-base-200 lg:block md:block hidden ">
-                                <Detail />
+                                {chatId && (<Detail />)}
                             </div>
                         </div>
                     </div>

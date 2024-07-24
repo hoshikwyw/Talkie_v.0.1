@@ -10,7 +10,7 @@ import { useChatStore } from '../lib/chatStore';
 
 const List = () => {
     const { currentUser } = useUserStore()
-    const {chatId , changeChat} = useChatStore()
+    const { chatId, changeChat } = useChatStore()
     const [chats, setChats] = useState([])
     const [modalOpen, setModalOpen] = useState(false)
 
@@ -31,15 +31,15 @@ const List = () => {
 
     const handleSelect = async (chat) => {
         const userChats = chats.map((item) => {
-            const {user , ...rest} = item
+            const { user, ...rest } = item
             return rest
         })
         const chatIndex = userChats.findIndex((item) => item.chatId === chat.chatId)
         userChats[chatIndex].isSeen = true
-        const userChatsRef = doc(db , "userchats", currentUser.id)
+        const userChatsRef = doc(db, "userchats", currentUser.id)
         try {
             await updateDoc(userChatsRef, {
-                chats : userChats
+                chats: userChats
             })
             changeChat(chat.chatId, chat.user)
         } catch (err) {
@@ -66,11 +66,11 @@ const List = () => {
                     </form>
                     <label onClick={() => setModalOpen(true)} htmlFor="my_modal_7" className=" bg-base-300 rounded-md px-2 text-[12px] font-semibold py-2">Add</label>
                 </div>
-                <li className=' w-full overflow-hidden'>
-                    {chats.map((chat) => (
-                        <UserInfo key={chat.chatId} onClick={() => handleSelect(chat)} name={chat.user.username} avatar={chat.user.profile || ""} lastMessage="Hello, how are you?" status="online" />
-                    ))}
-                </li>
+                {chats.map((chat) => (
+                    <li className=' w-full overflow-hidden' key={chat.chatId} onClick={() => handleSelect(chat)}>
+                        <UserInfo name={chat.user.username} avatar={chat.user.profile || ""} lastMessage="Hello, how are you?" status="online" />
+                    </li>
+                ))}
             </ul>
             <input type="checkbox" checked={modalOpen} id="my_modal_7" className="modal-toggle" />
             <AddUser setModalOpen={setModalOpen} currentUser={currentUser} />

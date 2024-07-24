@@ -1,73 +1,28 @@
 import React from 'react'
 import Avatar from '../listComponents/Avatar'
-import { useUserStore } from '../../lib/userStore'
 
-const YouChat = (props) => {
-    const { currentUser } = useUserStore()
+const YouChat = ({ key, message, user, currentUser }) => {
+    // console.log(message);
+    // console.log(user);
+    // console.log(currentUser);
     return (
         <div>
-            <div className="chat chat-start">
-                <div className="chat-image avatar">
-                    <Avatar avatar="" name="Halsey" status="online" />
+            <div className={`chat ${message.senderId === currentUser.id ? 'chat-end' : 'chat-start'}`}>
+                <div className="chat-image">
+                    <Avatar avatar={message.senderId === currentUser.id ? currentUser.profile : user.profile} name="Halsey" status="online" />
                 </div>
                 <div className="chat-header">
-                    <time className="text-xs opacity-50">12:45</time>
+                    {/* <time className="text-xs opacity-50">12:45</time> */}
                 </div>
                 <div className="chat-bubble">
-                    <p>You were the Chosen One!
-                    </p>
+                    {message.img && (
+                        <img src={message.img} alt="" className=' size-32 rounded-md' />
+                    )}
+                    {message.text && (
+                        <p>{message.text}</p>
+                    )}
                 </div>
-                <div className="chat-footer opacity-50">2 hours ago</div>
-            </div>
-            <div className="chat chat-start">
-                <div className="chat-image avatar">
-                    <Avatar avatar="" name="Halsey" status="online" />
-                </div>
-                <div className="chat-header">
-                    <time className="text-xs opacity-50">12:45</time>
-                </div>
-                <div className="chat-bubble">
-                    <p>You were the Chosen One!
-                    </p>
-                </div>
-                <div className="chat-footer opacity-50">2 hours ago</div>
-            </div>
-            <div className="chat chat-end">
-                <div className="chat-image avatar">
-                    <Avatar avatar={currentUser.profile || ""} />
-                </div>
-                <div className="chat-header">
-                    <time className="text-xs opacity-50">12:46</time>
-                </div>
-                <div className="chat-bubble">
-                    <img src="/noPfp.jpg" alt="" className=' size-32 rounded-md' />
-                </div>
-                <div className="chat-footer opacity-50">Seen</div>
-            </div>
-            <div className="chat chat-end">
-                <div className="chat-image avatar">
-                    <Avatar avatar={currentUser.profile || ""} />
-                </div>
-                <div className="chat-header">
-                    <time className="text-xs opacity-50">12:46</time>
-                </div>
-                <div className="chat-bubble">
-                    <p>You were the Chosen One!
-                    </p>
-                </div>
-                <div className="chat-footer opacity-50">Seen</div>
-            </div>
-            <div className="chat chat-start">
-                <div className="chat-image avatar">
-                    <Avatar avatar="" name="Halsey" status="online" />
-                </div>
-                <div className="chat-header">
-                    <time className="text-xs opacity-50">12:45</time>
-                </div>
-                <div className="chat-bubble">
-                    <img src="/pfp.jpg" alt="" className=' size-32 rounded-md' />
-                </div>
-                <div className="chat-footer opacity-50">2 hours ago</div>
+                {/* <div className="chat-footer opacity-50">2 hours ago</div> */}
             </div>
         </div>
     )
