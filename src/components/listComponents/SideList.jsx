@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useUserStore } from '../../lib/userStore';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { IoMdSearch } from "react-icons/io";
 import AddUser from './AddUser';
 import UserInfo from './UserInfo';
+import { useChatStore } from '../../lib/chatStore';
 
 const SideList = () => {
     const { currentUser } = useUserStore()
-    const [chatList, setChatList] = useState([])
+    const [chats, setChats] = useState([])
     const [modalOpen, setModalOpen] = useState(false)
+    const { chatId, changeChat } = useChatStore()
 
     useEffect(() => {
         const unSub = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {
@@ -21,10 +23,28 @@ const SideList = () => {
                 return { ...item, user }
             })
             const chatData = await Promise.all(promises)
-            setChatList(chatData.sort((a, b) => b.updatedAt - a.updatedAt))
+            setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt))
         })
         return () => { unSub() }
     }, [currentUser.id])
+
+    const handleSelect = async (chat) => {
+        const userChats = chats.map((item) => {
+            const { user, ...rest } = item
+            return rest
+        })
+        const chatIndex = userChats.findIndex((item) => item.chatId === chat.chatId)
+        userChats[chatIndex].isSeen = true
+        const userChatsRef = doc(db, "userchats", currentUser.id)
+        try {
+            await updateDoc(userChatsRef, {
+                chats: userChats
+            })
+            changeChat(chat.chatId, chat.user)
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <>
@@ -38,11 +58,11 @@ const SideList = () => {
                         </form>
                         <button onClick={() => setModalOpen(true)} htmlFor="my_modal_7" className=" bg-base-200 rounded-md px-2 text-base font-semibold py-2 cursor-pointer">Add</button>
                     </div>
-                    <li className=' '>
-                        {chatList.map((chat, index) => (
-                            <UserInfo key={index} name={chat.user.username} avatar={chat.user.profile || ""} lastMessage="Hello, how are you?" status="online" />
-                        ))}
-                    </li>
+                    {chats?.map((chat, index) => (
+                        <li className={`${chat?.isSeen ? "" : "bg-blue-300"} rounded-md cursor-pointer`} key={chat?.chatId} onClick={() => handleSelect(chat)}>
+                            <UserInfo key={index} name={chat?.user.username} avatar={chat?.user.profile || ""} lastMessage={chat?.lastMessage || ""} status="online" />
+                        </li>
+                    ))}
                 </ul>
                 <input type="checkbox" checked={modalOpen} id="my_modal_7" className="modal-toggle" />
                 <AddUser setModalOpen={setModalOpen} currentUser={currentUser} />

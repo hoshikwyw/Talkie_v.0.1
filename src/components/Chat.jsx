@@ -4,14 +4,19 @@ import { IoImage, IoCamera, IoMic, IoApps, IoSend, IoLogoOctocat } from "react-i
 import YouChat from './chatComponents/YouChat';
 import EmojiPicker from 'emoji-picker-react';
 import { SkinTones } from 'emoji-picker-react';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useChatStore } from '../lib/chatStore';
+import { useUserStore } from '../lib/userStore';
 
 const Chat = () => {
   const textPlaceRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [typeText, setTypeText] = useState('')
   const [chat, setChat] = useState()
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore()
+  const { currentUser } = useUserStore()
+  // console.log(chatId);
 
   const handleEmoji = (e) => {
     setTypeText(prev => prev + e.emoji)
@@ -25,17 +30,50 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    const unSub = onSnapshot(doc(db, "chats", "dhOdrMEPCRVKYEtu4gJPrGsxocj1"), (res) => {
+    const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
       setChat(res.data())
     })
     return () => { unSub() }
-  }, [])
+  }, [chatId])
+
+  const handleSend = async () => {
+    if (typeText === "") return
+    try {
+      await updateDoc(doc(db, "chats", chatId), {
+        messages: arrayUnion({
+          senderId: currentUser.id,
+          text: typeText,
+          createdAt: new Date(),
+        })
+      })
+      const userIDs = [currentUser.id, user.id]
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userchats", id)
+        const userChatsSnapshot = await getDoc(userChatsRef)
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data()
+          const chatIndex = userChatsData.chats.findIndex((item) => item.chatId === chatId)
+          userChatsData.chats[chatIndex].lastMessage = typeText
+          userChatsData.chats[chatIndex].updatedAt = Date.now()
+          userChatsData.chats[chatIndex].isSeen = id === currentUser.id ? true : false
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats
+          })
+        }
+      })
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setTypeText("")
+    }
+  }
 
   return (
     <div className=' grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.4rem)] relative'>
       <ChatHead
-        name="Halsey"
-        avatar=""
+        name={user?.username || ""}
+        avatar={user?.profile || ""}
         status="online"
         className="h-20"
       />
@@ -43,8 +81,11 @@ const Chat = () => {
         ref={textPlaceRef}
         className=" p-5 overflow-y-scroll no-scrollbar"
       >
-        <YouChat />
+        {chat?.messages?.map((message) => (
+          <YouChat key={message.createAt} message={message} user={user} currentUser={currentUser} />
+        ))}
       </div>
+
       <div className="flex items-end justify-between px-3 py-2 bg-base-300">
         <div className="flex items-center">
           <button className='btn btn-ghost btn-circle'><IoApps size={24} /></button>
@@ -80,7 +121,7 @@ const Chat = () => {
             />
           </div>
         )}
-        <button className='btn btn-ghost btn-circle'><IoSend size={24} /></button>
+        <button className='btn btn-ghost btn-circle' onClick={handleSend}><IoSend size={24} /></button>
       </div>
     </div>
   )
