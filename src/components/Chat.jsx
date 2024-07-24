@@ -8,6 +8,7 @@ import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firesto
 import { db } from '../lib/firebase';
 import { useChatStore } from '../lib/chatStore';
 import { useUserStore } from '../lib/userStore';
+import upload from "../lib/upload"
 
 const Chat = () => {
   const textPlaceRef = useRef(null);
@@ -16,11 +17,24 @@ const Chat = () => {
   const [chat, setChat] = useState()
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore()
   const { currentUser } = useUserStore()
-  // console.log(chatId);
+  const [img, setImg] = useState({
+    file: null,
+    url: "",
+  })
+  console.log(img);
 
   const handleEmoji = (e) => {
     setTypeText(prev => prev + e.emoji)
     setEmojiOpen(false)
+  }
+
+  const handleImg = (e) => {
+    if (e.target.files[0]) {
+      setImg({
+        file: e.target.files[0],
+        url: URL.createObjectURL(e.target.files[0])
+      })
+    }
   }
 
   useEffect(() => {
@@ -38,12 +52,17 @@ const Chat = () => {
 
   const handleSend = async () => {
     if (typeText === "") return
+    let imgUrl = null
     try {
+      if (img.file) {
+        imgUrl = await upload(img.file)
+      }
       await updateDoc(doc(db, "chats", chatId), {
         messages: arrayUnion({
           senderId: currentUser.id,
           text: typeText,
           createdAt: new Date(),
+          ...(imgUrl && { img: imgUrl })
         })
       })
       const userIDs = [currentUser.id, user.id]
@@ -82,14 +101,15 @@ const Chat = () => {
         className=" p-5 overflow-y-scroll no-scrollbar"
       >
         {chat?.messages?.map((message) => (
-          <YouChat key={message.createAt} message={message} user={user} currentUser={currentUser} />
+          <YouChat key={message.createdAt} message={message} img={img} user={user} currentUser={currentUser} />
         ))}
       </div>
 
       <div className="flex items-end justify-between px-3 py-2 bg-base-300">
         <div className="flex items-center">
           <button className='btn btn-ghost btn-circle'><IoApps size={24} /></button>
-          <button className='btn btn-ghost btn-circle'><IoImage size={24} /></button>
+          <label htmlFor="file" className='btn btn-ghost btn-circle'><IoImage size={24} /></label>
+          <input type='file' id='file' onChange={handleImg} className=' hidden' />
           <button className='btn btn-ghost btn-circle'><IoCamera size={24} /></button>
           <button className='btn btn-ghost btn-circle'><IoMic size={24} /></button>
         </div>

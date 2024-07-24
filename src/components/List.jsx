@@ -66,9 +66,9 @@ const List = () => {
                     </form>
                     <label onClick={() => setModalOpen(true)} htmlFor="my_modal_7" className=" bg-base-300 rounded-md px-2 text-[12px] font-semibold py-2">Add</label>
                 </div>
-                {chats.map((chat) => (
-                    <li className=' w-full overflow-hidden' key={chat.chatId} onClick={() => handleSelect(chat)}>
-                        <UserInfo name={chat.user.username} avatar={chat.user.profile || ""} lastMessage="Hello, how are you?" status="online" />
+                {chats?.map((chat, index) => (
+                    <li className={`${chat?.isSeen ? "" : "bg-blue-300"} rounded-md cursor-pointer`} key={chat?.chatId} onClick={() => handleSelect(chat)}>
+                        <UserInfo key={index} name={chat?.user.username} avatar={chat?.user.profile || ""} lastMessage={chat?.lastMessage || ""} status="online" />
                     </li>
                 ))}
             </ul>
