@@ -53,6 +53,7 @@ const Chat = () => {
   const handleSend = async () => {
     if (typeText === "") return
     let imgUrl = null
+    console.log(imgUrl);
     try {
       if (img.file) {
         imgUrl = await upload(img.file)
@@ -84,6 +85,7 @@ const Chat = () => {
     } catch (err) {
       console.log(err);
     } finally {
+      setImg({ file: null, url: "" })
       setTypeText("")
     }
   }
@@ -114,6 +116,11 @@ const Chat = () => {
           <button className='btn btn-ghost btn-circle'><IoMic size={24} /></button>
         </div>
         <div className="flex items-center px-3 py-1 bg-base-200 rounded-2xl w-[50%] lg:w-[80%] relative">
+          {img.url && (
+            <div className="image-container size-14 leading-snug">
+              <img src={img.url} alt="Displayed" />
+            </div>
+          )}
           <textarea
             className='bg-transparent text-base outline-none w-full h-auto resize-none leading-snug p-2'
             placeholder='Type a message'

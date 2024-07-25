@@ -1,7 +1,7 @@
 import React from 'react'
 import Avatar from '../listComponents/Avatar'
 
-const YouChat = ({ message, user, currentUser, img }) => {
+const YouChat = ({ message, user, currentUser }) => {
     console.log(message);
     // console.log(user);
     // console.log(currentUser);
@@ -15,9 +15,6 @@ const YouChat = ({ message, user, currentUser, img }) => {
                     {/* <time className="text-xs opacity-50">12:45</time> */}
                 </div>
                 <div className="chat-bubble">
-                    {img.url && (
-                        <img src={img.url} alt="" className=' size-32 rounded-md' />
-                    )}
                     {message.img && (
                         <img src={message.img} alt="" className=' size-32 rounded-md' />
                     )}
