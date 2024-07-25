@@ -21,7 +21,8 @@ const Chat = () => {
     file: null,
     url: "",
   })
-  console.log(img);
+  console.log(isCurrentUserBlocked,"current user");
+  console.log(isReceiverBlocked,"receiver");
 
   const handleEmoji = (e) => {
     setTypeText(prev => prev + e.emoji)
@@ -95,7 +96,7 @@ const Chat = () => {
       <ChatHead
         name={user?.username || ""}
         avatar={user?.profile || ""}
-        status="online"
+        status=""
         className="h-20"
       />
       <div
@@ -108,47 +109,60 @@ const Chat = () => {
       </div>
 
       <div className="flex items-end justify-between px-3 py-2 bg-base-300">
-        <div className="flex items-center">
-          <button className='btn btn-ghost btn-circle'><IoApps size={24} /></button>
-          <label htmlFor="file" className='btn btn-ghost btn-circle'><IoImage size={24} /></label>
-          <input type='file' id='file' onChange={handleImg} className=' hidden' />
-          <button className='btn btn-ghost btn-circle'><IoCamera size={24} /></button>
-          <button className='btn btn-ghost btn-circle'><IoMic size={24} /></button>
-        </div>
-        <div className="flex items-center px-3 py-1 bg-base-200 rounded-2xl w-[50%] lg:w-[80%] relative">
-          {img.url && (
-            <div className="image-container size-14 leading-snug">
-              <img src={img.url} alt="Displayed" />
+        {isCurrentUserBlocked || isReceiverBlocked ? (
+          <div className=' w-full items-center justify-center'>
+            <p className=' text-center font-semibold'>You cannot send a message</p>
+          </div>
+        ) : (
+          <div className=" w-full flex items-center">
+            <div className="flex items-center">
+              <button className='btn btn-ghost btn-circle'><IoApps size={24} /></button>
+              <label htmlFor="file" className='btn btn-ghost btn-circle'><IoImage size={24} /></label>
+              <input type='file' id='file' onChange={handleImg} className=' hidden' />
+              <button className='btn btn-ghost btn-circle'><IoCamera size={24} /></button>
+              <button className='btn btn-ghost btn-circle'><IoMic size={24} /></button>
             </div>
-          )}
-          <textarea
-            className='bg-transparent text-base outline-none w-full h-auto resize-none leading-snug p-2'
-            placeholder='Type a message'
-            value={typeText}
-            rows={1}
-            onChange={e => setTypeText(e.target.value)}
-            onInput={(e) => {
-              e.target.style.height = 'auto';
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
-          />
-          <button className='btn btn-ghost btn-circle'><IoLogoOctocat size={24} onClick={() => setEmojiOpen(!emojiOpen)} /></button>
-        </div>
-        {emojiOpen && (
-          <div className="absolute bottom-16 right-1">
-            <EmojiPicker
-              onEmojiClick={handleEmoji}
-              onSkinToneChange={SkinTones}
-              pickerStyle={{
-                boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.2)',
-                borderRadius: '10px',
-                zIndex: 50,
-                background: 'transparent'
-              }}
-            />
+            <div className="flex items-center px-3 py-1 bg-base-200 rounded-2xl w-[50%] lg:w-[80%] relative">
+              {img.url && (
+                <div className="image-container size-14 leading-snug">
+                  <img src={img.url} alt="Displayed" />
+                </div>
+              )}
+              <textarea
+                className='bg-transparent text-base outline-none w-full h-auto resize-none leading-snug p-2'
+                placeholder={
+                  isCurrentUserBlocked || isReceiverBlocked
+                    ? "You cannot send a message"
+                    : "Type a message..."
+                }
+                value={typeText}
+                rows={1}
+                onChange={e => setTypeText(e.target.value)}
+                onInput={(e) => {
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
+
+              />
+              <button className='btn btn-ghost btn-circle' ><IoLogoOctocat size={24} onClick={() => setEmojiOpen(!emojiOpen)} /></button>
+            </div>
+            {emojiOpen && (
+              <div className="absolute bottom-16 right-1">
+                <EmojiPicker
+                  onEmojiClick={handleEmoji}
+                  onSkinToneChange={SkinTones}
+                  pickerStyle={{
+                    boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.2)',
+                    borderRadius: '10px',
+                    zIndex: 50,
+                    background: 'transparent'
+                  }}
+                />
+              </div>
+            )}
+            <button className='btn btn-ghost btn-circle' onClick={handleSend} ><IoSend size={24} /></button>
           </div>
         )}
-        <button className='btn btn-ghost btn-circle' onClick={handleSend}><IoSend size={24} /></button>
       </div>
     </div>
   )
