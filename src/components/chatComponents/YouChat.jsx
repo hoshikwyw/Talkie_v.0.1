@@ -2,14 +2,14 @@ import React from 'react'
 import Avatar from '../listComponents/Avatar'
 
 const YouChat = ({ message, user, currentUser }) => {
-    console.log(message);
+    // console.log(message);
     // console.log(user);
     // console.log(currentUser);
     return (
         <div>
             <div className={`chat ${message.senderId === currentUser.id ? 'chat-end' : 'chat-start'}`}>
                 <div className="chat-image">
-                    <Avatar avatar={message.senderId === currentUser.id ? currentUser.profile : user.profile} name="Halsey" status="online" />
+                    <Avatar avatar={message.senderId === currentUser.id ? currentUser?.profile : user?.profile} name={message.senderId === currentUser.id ? currentUser?.username : user?.username} status="online" />
                 </div>
                 <div className="chat-header">
                     {/* <time className="text-xs opacity-50">12:45</time> */}
