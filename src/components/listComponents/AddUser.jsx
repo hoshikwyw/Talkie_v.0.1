@@ -89,3 +89,21 @@ const AddUser = ({ setModalOpen, currentUser }) => {
 }
 
 export default AddUser
+
+
+
+
+// import { collection, getDocs, query, where, deleteDoc } from "firebase/firestore";
+
+// // Replace 'your-collection' with your actual collection name
+// const collectionRef = collection(db, 'your-collection');
+
+// try {
+//   const querySnapshot = await getDocs(collectionRef);
+//   querySnapshot.forEach((doc) => {
+//     deleteDoc(doc.ref);
+//   });
+//   console.log("Collection deleted successfully!");
+// } catch (error) {
+//   console.error("Error deleting collection: ", error);
+// }

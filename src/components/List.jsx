@@ -13,6 +13,7 @@ const List = () => {
     const { chatId, changeChat } = useChatStore()
     const [chats, setChats] = useState([])
     const [modalOpen, setModalOpen] = useState(false)
+    console.log(chats);
 
     useEffect(() => {
         const unSub = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {

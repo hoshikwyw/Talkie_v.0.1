@@ -2,6 +2,7 @@ import React from 'react'
 import { FcDownload } from "react-icons/fc";
 
 const SendImg = ({ src }) => {
+  console.log("src>>", src);
   return (
     <div className="card image-full size-28 shadow-xl group">
       <figure>
