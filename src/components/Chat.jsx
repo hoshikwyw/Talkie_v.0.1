@@ -21,8 +21,8 @@ const Chat = () => {
     file: null,
     url: "",
   })
-  console.log(isCurrentUserBlocked,"current user");
-  console.log(isReceiverBlocked,"receiver");
+  // console.log(isCurrentUserBlocked,"current user");
+  // console.log(isReceiverBlocked,"receiver");
 
   const handleEmoji = (e) => {
     setTypeText(prev => prev + e.emoji)
