@@ -11,11 +11,12 @@ const Login = () => {
         setLoading(true)
         const formData = new FormData(e.target)
         const { email, password } = Object.fromEntries(formData)
-        console.log(email, password);
+        // console.log(email, password);
         try {
             await signInWithEmailAndPassword(auth, email, password)
+            console.log("user logged in successfully");
         } catch (err) {
-            console.log(err);
+            console.log(err, "error message");
             toast.error(err.message)
         } finally {
             setLoading(false)

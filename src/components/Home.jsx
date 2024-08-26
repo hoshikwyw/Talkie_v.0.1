@@ -12,6 +12,8 @@ import { useChatStore } from '../lib/chatStore'
 
 const Home = () => {
     const { currentUser, isLoading, fetchUserInfo } = useUserStore()
+    console.log(currentUser, "current user");
+
     const { chatId } = useChatStore()
     // console.log(chatId);
 

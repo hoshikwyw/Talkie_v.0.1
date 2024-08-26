@@ -47,7 +47,7 @@ const AddUser = ({ setModalOpen, currentUser }) => {
         e.preventDefault()
         const formData = new FormData(e.target)
         const username = formData.get('username')
-        console.log(username);
+        // console.log(username);
         try {
             const userRef = collection(db, "users")
             const q = query(userRef, where("username", "==", username))
