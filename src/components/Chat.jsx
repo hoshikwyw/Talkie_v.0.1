@@ -9,11 +9,14 @@ import { db } from '../lib/firebase';
 import { useChatStore } from '../lib/chatStore';
 import { useUserStore } from '../lib/userStore';
 import upload from "../lib/upload"
+import SubDetails from './SubDetails';
 
 const Chat = () => {
   const textPlaceRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [typeText, setTypeText] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  const [isClicked, setIsClicked] = useState(false)
   const [chat, setChat] = useState()
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore()
   const { currentUser } = useUserStore()
@@ -53,8 +56,11 @@ const Chat = () => {
 
   const handleSend = async () => {
     if (typeText === "") return
+    setIsSending(true)
+    setTypeText("sending ....")
+    setImg({ url: "" })
     let imgUrl = null
-    console.log(imgUrl);
+    // console.log(imgUrl);
     try {
       if (img.file) {
         imgUrl = await upload(img.file)
@@ -83,86 +89,103 @@ const Chat = () => {
           })
         }
       })
+
     } catch (err) {
       console.log(err);
     } finally {
       setImg({ file: null, url: "" })
       setTypeText("")
+      setIsSending(false)
     }
   }
 
   return (
-    <div className=' grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.4rem)] relative'>
-      <ChatHead
-        name={user?.username || ""}
-        avatar={user?.profile || ""}
-        status=""
-        className="h-20"
-      />
-      <div
-        ref={textPlaceRef}
-        className=" p-5 overflow-y-scroll no-scrollbar"
-      >
-        {chat?.messages?.map((message) => (
-          <YouChat key={message.createdAt} message={message} img={img} user={user} currentUser={currentUser} />
-        ))}
-      </div>
-
-      <div className="flex items-end justify-between px-3 py-2 bg-base-300">
-        {isCurrentUserBlocked || isReceiverBlocked ? (
-          <div className=' w-full items-center justify-center'>
-            <p className=' text-center font-semibold'>You cannot send a message</p>
-          </div>
-        ) : (
-          <div className=" w-full flex items-center">
-            <div className="flex items-center">
-              <button className='btn btn-ghost btn-circle'><IoApps size={24} /></button>
-              <label htmlFor="file" className='btn btn-ghost btn-circle'><IoImage size={24} /></label>
-              <input type='file' id='file' onChange={handleImg} className=' hidden' />
-              <button className='btn btn-ghost btn-circle'><IoCamera size={24} /></button>
-              <button className='btn btn-ghost btn-circle'><IoMic size={24} /></button>
+    <div className="drawer">
+      <div id="my-drawer-2">
+        <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+        <div className='drawer-content'>
+          <div className=" grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.4rem)] relative">
+            <ChatHead
+              name={user?.username || ""}
+              avatar={user?.profile || ""}
+              status=""
+              className="h-20"
+            />
+            <div
+              ref={textPlaceRef}
+              className=" p-5 overflow-y-scroll no-scrollbar"
+            >
+              {chat?.messages?.map((message) => (
+                <YouChat key={message.createdAt} message={message} img={img} user={user} currentUser={currentUser} />
+              ))}
             </div>
-            <div className="flex items-center px-3 py-1 bg-base-200 rounded-2xl w-[50%] lg:w-[80%] relative">
-              {img.url && (
-                <div className="image-container size-14 leading-snug">
-                  <img src={img.url} alt="Displayed" />
+            <div className="flex items-end justify-between px-3 py-2 bg-base-300">
+              {isCurrentUserBlocked || isReceiverBlocked ? (
+                <div className=' w-full items-center justify-center'>
+                  <p className=' text-center font-semibold'>You cannot send a message</p>
+                </div>
+              ) : (
+                <div className=" w-full flex items-center">
+                  <div className="flex items-center">
+                    <div className="tooltip tooltip-error" data-tip="Can't use now">
+                      <button className='btn btn-ghost btn-circle'><IoApps size={24} /></button>
+                    </div>
+                    <label htmlFor="file" className='btn btn-ghost btn-circle'><IoImage size={24} /></label>
+                    <input type='file' id='file' onChange={handleImg} className=' hidden' />
+                    <div className="tooltip tooltip-error" data-tip="Can't use now">
+                      <button className='btn btn-ghost btn-circle'><IoCamera size={24} /></button>
+                    </div>
+                    <div className="tooltip tooltip-error" data-tip="Can't use now">
+                      <button className='btn btn-ghost btn-circle'><IoMic size={24} /></button>
+                    </div>
+                  </div>
+                  <div className="flex items-center px-3 py-1 bg-base-200 rounded-2xl w-[50%] lg:w-[80%] relative">
+                    {img.url && (
+                      <div className="image-container size-14 leading-snug">
+                        <img src={img.url} alt="Displayed" />
+                      </div>
+                    )}
+                    <textarea
+                      className='bg-transparent text-base outline-none w-full h-auto resize-none leading-snug p-2'
+                      placeholder={
+                        isCurrentUserBlocked || isReceiverBlocked
+                          ? "You cannot send a message"
+                          : "Type a message..."
+                      }
+                      value={typeText}
+                      rows={1}
+                      onChange={e => setTypeText(e.target.value)}
+                      onInput={(e) => {
+                        e.target.style.height = 'auto';
+                        e.target.style.height = `${e.target.scrollHeight}px`;
+                      }}
+
+                    />
+                    <button className='btn btn-ghost btn-circle' ><IoLogoOctocat size={24} onClick={() => setEmojiOpen(!emojiOpen)} /></button>
+                  </div>
+                  {emojiOpen && (
+                    <div className="absolute bottom-16 right-1">
+                      <EmojiPicker
+                        onEmojiClick={handleEmoji}
+                        onSkinToneChange={SkinTones}
+                        pickerStyle={{
+                          boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.2)',
+                          borderRadius: '10px',
+                          zIndex: 50,
+                          background: 'transparent'
+                        }}
+                      />
+                    </div>
+                  )}
+                  <button className='btn btn-ghost btn-circle' onClick={handleSend} disabled={isSending} ><IoSend size={24} /></button>
                 </div>
               )}
-              <textarea
-                className='bg-transparent text-base outline-none w-full h-auto resize-none leading-snug p-2'
-                placeholder={
-                  isCurrentUserBlocked || isReceiverBlocked
-                    ? "You cannot send a message"
-                    : "Type a message..."
-                }
-                value={typeText}
-                rows={1}
-                onChange={e => setTypeText(e.target.value)}
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-
-              />
-              <button className='btn btn-ghost btn-circle' ><IoLogoOctocat size={24} onClick={() => setEmojiOpen(!emojiOpen)} /></button>
             </div>
-            {emojiOpen && (
-              <div className="absolute bottom-16 right-1">
-                <EmojiPicker
-                  onEmojiClick={handleEmoji}
-                  onSkinToneChange={SkinTones}
-                  pickerStyle={{
-                    boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.2)',
-                    borderRadius: '10px',
-                    zIndex: 50,
-                    background: 'transparent'
-                  }}
-                />
-              </div>
-            )}
-            <button className='btn btn-ghost btn-circle' onClick={handleSend} ><IoSend size={24} /></button>
           </div>
-        )}
+          <div className="drawer-end z-30">
+            <SubDetails />
+          </div>
+        </div>
       </div>
     </div>
   )
