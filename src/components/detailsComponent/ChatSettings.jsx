@@ -11,7 +11,7 @@ const ChatSettings = () => {
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock, resetChat } =
     useChatStore();
   const { currentUser } = useUserStore();
-  console.log(chatId);
+  // console.log(chatId);
   const handleBlock = async () => {
     if (!user) return
     const userDocRef = doc(db, "users", currentUser.id)

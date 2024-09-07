@@ -6,7 +6,7 @@ import { FcDownload } from "react-icons/fc";
 
 const SharedImgs = ({ chatId }) => {
   const [sharedImgs, setSharedImgs] = useState([])
-  console.log(sharedImgs);
+  // console.log(sharedImgs);
   useEffect(() => {
     const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
       let sendedSMS = res.data().messages

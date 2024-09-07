@@ -16,7 +16,10 @@ const ChatHead = ({ name, avatar, status }) => {
             <div className=" flex items-center gap-3">
                 <button className="btn btn-ghost btn-circle"><IoIosCall size={20} /></button>
                 <button className="btn btn-ghost btn-circle"><IoIosVideocam size={20} /></button>
-                <button className="btn btn-ghost btn-circle"><IoIosMore size={20} /></button>
+                <label htmlFor="my-drawer-2" className="btn btn-ghost btn-circle drawer-button">
+                    <IoIosMore size={20} />
+                </label>
+                {/* <button className="btn btn-ghost btn-circle"></button> */}
             </div>
         </div>
     )
