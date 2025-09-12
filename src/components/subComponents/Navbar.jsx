@@ -3,16 +3,18 @@ import { IoIosNotificationsOutline } from "react-icons/io";
 import { IoIosMenu } from "react-icons/io";
 import { auth } from '../../lib/firebase';
 import { useUserStore } from '../../lib/userStore';
+import { useNavigate } from 'react-router-dom';
 
 
 const Navbar = () => {
     const { currentUser } = useUserStore()
+    const navigate = useNavigate()
     // console.log(currentUser);
     return (
-        <div className="navbar bg-base-100 shadow-sm">
+        <div className="shadow-sm navbar bg-base-100">
             <label htmlFor="my-drawer" className="btn btn-ghost btn-circle btn-primary drawer-button auto lg:hidden"><IoIosMenu size={30} /></label>
             <div className="flex-1">
-                <a className="btn btn-ghost text-xl">Talkie</a>
+                <a className="text-xl normal-case btn btn-ghost">Talkie</a>
             </div>
             <div className="flex-none">
                 <div className="dropdown dropdown-end">
@@ -40,12 +42,7 @@ const Navbar = () => {
                     <ul
                         tabIndex={0}
                         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-                        <li>
-                            <a className="justify-between">
-                                Profile
-                                <span className="badge">New</span>
-                            </a>
-                        </li>
+                        <li><button onClick={() => navigate('/profile')}>Profile</button></li>
                         <li><a>Settings</a></li>
                         <li><button onClick={() => { auth.signOut() }}>Logout</button></li>
                     </ul>
