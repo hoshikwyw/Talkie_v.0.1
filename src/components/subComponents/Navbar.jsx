@@ -1,5 +1,5 @@
 import React from 'react'
-import { IoIosNotificationsOutline } from "react-icons/io";
+// import { IoIosNotificationsOutline } from "react-icons/io";
 import { IoIosMenu } from "react-icons/io";
 import { auth } from '../../lib/firebase';
 import { useUserStore } from '../../lib/userStore';
@@ -17,7 +17,7 @@ const Navbar = () => {
                 <a className="text-xl normal-case btn btn-ghost">Talkie</a>
             </div>
             <div className="flex-none">
-                <div className="dropdown dropdown-end">
+                {/* <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
                         <div className="indicator">
                             <IoIosNotificationsOutline className=' size-7' />
@@ -30,7 +30,7 @@ const Navbar = () => {
                         <li><a>Item 1</a></li>
                         <li><a>Item 2</a></li>
                     </ul>
-                </div>
+                </div> */}
                 <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
