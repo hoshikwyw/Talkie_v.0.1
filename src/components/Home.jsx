@@ -27,13 +27,13 @@ const Home = () => {
     if (isLoading) return <div className=" loading absolute top-[40%] left-[50%] size-14 justify-center flex items-center">Loading...</div>;
 
     return (
-        <div data-theme="nord" className=' min-h-screen overflow-hidden min-w-screen'>
+        <div data-theme="dim" className='min-h-screen overflow-hidden min-w-screen'>
             {currentUser ? (
                 <div className="drawer ">
                     <input id="my-drawer" type="checkbox" className="drawer-toggle" />
                     <div className="drawer-content">
                         <Navbar />
-                        <div className=" flex w-full mt-1">
+                        <div className="flex w-full mt-1 ">
                             <div className=" w-[25%] bg-base-300 shadow-md hidden lg:block">
                                 <SideList />
                             </div>
@@ -45,7 +45,7 @@ const Home = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="drawer-side z-30">
+                    <div className="z-30 drawer-side">
                         <List />
                     </div>
                    

@@ -5,7 +5,7 @@ import NotiAlert from './components/subComponents/NotiAlert'
 
 const App = () => {
   return (
-    <div data-theme="nord" className=' min-w-screen min-h-screen relative'>
+    <div data-theme="dim" className='relative min-h-screen min-w-screen'>
       <Paths />
       <NotiAlert />
     </div>
