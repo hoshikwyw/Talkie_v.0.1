@@ -1,18 +1,8 @@
-import React, { useEffect } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../lib/firebase'
 import { useUserStore } from '../lib/userStore'
 
 const AuthGuard = () => {
-  const { currentUser, isLoading, fetchUserInfo } = useUserStore()
-
-  useEffect(() => {
-    const unSub = onAuthStateChanged(auth, (user) => {
-      fetchUserInfo(user?.uid)
-    })
-    return () => { unSub() }
-  }, [fetchUserInfo])
+  const { currentUser, isLoading } = useUserStore()
 
   if (isLoading) {
     return (

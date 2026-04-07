@@ -1,20 +1,16 @@
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
-import React, { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import React, { useState } from 'react'
+import { NavLink, Navigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { auth, signInWithGoogle } from '../lib/firebase'
+import { useUserStore } from '../lib/userStore'
 
 const Login = () => {
     const [loading, setLoading] = useState(false)
     const [googleLoading, setGoogleLoading] = useState(false)
-    const navigate = useNavigate()
+    const { currentUser, fetchUserInfo } = useUserStore()
 
-    useEffect(() => {
-        const unSub = onAuthStateChanged(auth, (user) => {
-            if (user) navigate('/', { replace: true })
-        })
-        return () => unSub()
-    }, [navigate])
+    if (currentUser) return <Navigate to="/" replace />
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -22,7 +18,8 @@ const Login = () => {
         const formData = new FormData(e.target)
         const { email, password } = Object.fromEntries(formData)
         try {
-            await signInWithEmailAndPassword(auth, email, password)
+            const res = await signInWithEmailAndPassword(auth, email, password)
+            await fetchUserInfo(res.user.uid)
         } catch (err) {
             toast.error(err.message)
         } finally {
@@ -33,11 +30,10 @@ const Login = () => {
     const handleGoogleLogin = async () => {
         try {
             setGoogleLoading(true)
-            await signInWithGoogle()
+            const user = await signInWithGoogle()
+            await fetchUserInfo(user.uid)
         } catch (err) {
-            if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-                toast.error(err.message)
-            }
+            toast.error(err.message)
         } finally {
             setGoogleLoading(false)
         }

@@ -21,25 +21,14 @@ export const auth = getAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage()
 
-let googleSignInPending = false;
-
 export const signInWithGoogle = async () => {
-  if (googleSignInPending) return;
-  googleSignInPending = true;
-
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
-  let result;
-  try {
-    result = await signInWithPopup(auth, provider);
-  } catch (err) {
-    googleSignInPending = false;
-    throw err;
-  }
-  googleSignInPending = false;
+  const result = await signInWithPopup(auth, provider);
   const user = result.user;
 
+  // Ensure Firestore doc exists BEFORE returning
   const userRef = doc(db, "users", user.uid);
   const userSnap = await getDoc(userRef);
 

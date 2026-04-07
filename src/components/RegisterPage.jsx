@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import React, { useState } from 'react'
+import { NavLink, Navigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { auth, signInWithGoogle } from '../lib/firebase'
-import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 import upload from '../lib/upload'
 import { createUserDocument } from '../lib/services/userService'
+import { useUserStore } from '../lib/userStore'
 
 const RegisterPage = () => {
     const [profile, setProfile] = useState({ file: null, url: "" })
     const [loading, setLoading] = useState(false)
     const [googleLoading, setGoogleLoading] = useState(false)
     const [errors, setErrors] = useState({})
-    const navigate = useNavigate()
+    const { currentUser, fetchUserInfo } = useUserStore()
 
-    useEffect(() => {
-        const unSub = onAuthStateChanged(auth, (user) => {
-            if (user) navigate('/', { replace: true })
-        })
-        return () => unSub()
-    }, [navigate])
+    if (currentUser) return <Navigate to="/" replace />
 
     const handleProfile = (e) => {
         setProfile({ file: e.target.files[0], url: URL.createObjectURL(e.target.files[0]) })
@@ -27,12 +23,11 @@ const RegisterPage = () => {
     const handleGoogleRegister = async () => {
         try {
             setGoogleLoading(true)
-            await signInWithGoogle()
+            const user = await signInWithGoogle()
+            await fetchUserInfo(user.uid)
             toast.success("Registration Successful!")
         } catch (err) {
-            if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-                toast.error(err.message)
-            }
+            toast.error(err.message)
         } finally {
             setGoogleLoading(false)
         }
@@ -70,8 +65,8 @@ const RegisterPage = () => {
                 email,
                 profile: imgUrl,
             })
+            await fetchUserInfo(res.user.uid)
             toast.success("Registration Successful!")
-            navigate("/")
         } catch (err) {
             console.error("Registration error:", err)
             toast.error(err.message)
