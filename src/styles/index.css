@@ -82,17 +82,21 @@
 
   /* Scrollbar styled */
   .pixel-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 5px;
   }
   .pixel-scrollbar::-webkit-scrollbar-track {
-    background: #1e1e2f;
+    background: transparent;
   }
   .pixel-scrollbar::-webkit-scrollbar-thumb {
-    background: #363650;
-    border: 2px solid #1e1e2f;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
   }
   .pixel-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #ef8354;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .pixel-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
   }
 
   /* Pixel divider */
