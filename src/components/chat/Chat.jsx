@@ -150,9 +150,22 @@ const Chat = ({ onDetailToggle }) => {
             </button>
 
             {emojiOpen && (
-              <div className="absolute bottom-20 right-4 z-50">
-                <EmojiPicker onEmojiClick={handleEmoji} theme="dark" />
-              </div>
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setEmojiOpen(false)} />
+                <div className="absolute bottom-16 right-16 z-50 rounded-xl overflow-hidden shadow-2xl"
+                     style={{ border: `2px solid ${theme.muted}30` }}>
+                  <EmojiPicker
+                    onEmojiClick={handleEmoji}
+                    theme="dark"
+                    width={280}
+                    height={350}
+                    searchDisabled
+                    skinTonesDisabled
+                    previewConfig={{ showPreview: false }}
+                    lazyLoadEmojis
+                  />
+                </div>
+              </>
             )}
           </div>
         )}
