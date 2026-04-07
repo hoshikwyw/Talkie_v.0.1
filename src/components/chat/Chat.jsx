@@ -7,6 +7,7 @@ import EmojiPicker from 'emoji-picker-react'
 import { useChatStore } from '../../lib/chatStore'
 import { useUserStore } from '../../lib/userStore'
 import { subscribeToChat, sendMessage } from '../../lib/services/chatService'
+import { useThemeStore } from '../../lib/themeStore'
 
 const Chat = ({ onDetailToggle }) => {
   const scrollRef = useRef(null)
@@ -16,6 +17,8 @@ const Chat = ({ onDetailToggle }) => {
   const [chat, setChat] = useState()
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore()
   const { currentUser } = useUserStore()
+  const { getTheme } = useThemeStore()
+  const theme = getTheme()
   const [img, setImg] = useState({ file: null, url: '' })
 
   const handleEmoji = (e) => {
@@ -60,15 +63,15 @@ const Chat = ({ onDetailToggle }) => {
   const blocked = isCurrentUserBlocked || isReceiverBlocked
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ background: theme.bg }}>
       <ChatHead name={user?.username || ''} avatar={user?.profile || ''} onDetailToggle={onDetailToggle} />
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto pixel-scrollbar p-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto pixel-scrollbar px-4 py-6 md:px-8">
         {(!chat?.messages || chat.messages.length === 0) && (
-          <div className="flex flex-col items-center justify-center h-full gap-2">
-            <span className="font-pixel text-[10px] text-pixel-muted text-shadow-pixel">NO MESSAGES YET</span>
-            <span className="font-body text-pixel-muted">Say hello!</span>
+          <div className="flex flex-col items-center justify-center h-full gap-3">
+            <span className="font-pixel text-[10px]" style={{ color: theme.muted }}>NO MESSAGES YET</span>
+            <span className="font-body text-lg" style={{ color: theme.muted }}>Say hello!</span>
           </div>
         )}
         {chat?.messages?.map((message, index) => (
@@ -82,26 +85,30 @@ const Chat = ({ onDetailToggle }) => {
       </div>
 
       {/* Input */}
-      <div className="p-3 bg-surface border-t-3 border-pixel-cream/10">
+      <div className="px-4 py-3 md:px-8" style={{ background: theme.surface, borderTop: `2px solid ${theme.muted}20` }}>
         {blocked ? (
           <div className="text-center py-3">
-            <span className="font-pixel text-[8px] text-pixel-red">BLOCKED - CANNOT SEND MESSAGES</span>
+            <span className="font-pixel text-[9px]" style={{ color: theme.primary }}>BLOCKED - CANNOT SEND</span>
           </div>
         ) : (
-          <div className="flex items-end gap-2">
-            <label htmlFor="chat-file" className="pixel-btn-ghost !p-2 cursor-pointer flex-shrink-0">
-              <IoImage size={20} className="text-pixel-purple" />
+          <div className="flex items-end gap-3">
+            {/* Image upload */}
+            <label htmlFor="chat-file" className="flex-shrink-0 p-2 rounded-xl cursor-pointer transition-colors hover:opacity-80"
+                   style={{ background: `${theme.primary}15` }}>
+              <IoImage size={20} style={{ color: theme.primary }} />
             </label>
             <input type="file" id="chat-file" onChange={handleImg} className="hidden" />
 
-            <div className="flex-1 flex flex-col pixel-input !p-0 !shadow-none relative">
+            {/* Text input area */}
+            <div className="flex-1 rounded-2xl overflow-hidden" style={{ background: theme.surfaceLight, border: `1px solid ${theme.muted}20` }}>
               {img.url && (
-                <div className="p-2 border-b border-pixel-cream/10">
+                <div className="px-3 pt-3" style={{ borderBottom: `1px solid ${theme.muted}15` }}>
                   <div className="relative inline-block">
-                    <img src={img.url} alt="Attached" className="h-16 rounded-sm border-2 border-pixel-cream/10" />
+                    <img src={img.url} alt="Attached" className="h-16 rounded-lg border border-white/10" />
                     <button
                       onClick={() => setImg({ file: null, url: '' })}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-pixel-red text-pixel-cream text-xs flex items-center justify-center"
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-xs flex items-center justify-center"
+                      style={{ background: theme.primary, color: theme.bg }}
                     >
                       x
                     </button>
@@ -109,7 +116,8 @@ const Chat = ({ onDetailToggle }) => {
                 </div>
               )}
               <textarea
-                className="bg-transparent outline-none font-body text-lg text-pixel-cream w-full px-3 py-2 resize-none placeholder:text-pixel-muted/50"
+                className="bg-transparent outline-none font-body text-lg w-full px-4 py-3 resize-none"
+                style={{ color: theme.text }}
                 placeholder="Type a message..."
                 value={typeText}
                 rows={1}
@@ -127,11 +135,17 @@ const Chat = ({ onDetailToggle }) => {
               />
             </div>
 
-            <button onClick={() => setEmojiOpen(!emojiOpen)} className="pixel-btn-ghost !p-2 flex-shrink-0">
-              <IoLogoOctocat size={20} className="text-pixel-yellow" />
+            {/* Emoji */}
+            <button onClick={() => setEmojiOpen(!emojiOpen)}
+                    className="flex-shrink-0 p-2 rounded-xl transition-colors hover:opacity-80"
+                    style={{ background: `${theme.accent}15` }}>
+              <IoLogoOctocat size={20} style={{ color: theme.accent }} />
             </button>
 
-            <button onClick={handleSend} disabled={isSending} className="pixel-btn-primary !p-2 flex-shrink-0">
+            {/* Send */}
+            <button onClick={handleSend} disabled={isSending}
+                    className="flex-shrink-0 p-3 rounded-xl transition-all hover:scale-105 active:scale-95"
+                    style={{ background: theme.primary, color: theme.bg }}>
               <IoSend size={18} />
             </button>
 
