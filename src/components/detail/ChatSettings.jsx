@@ -34,23 +34,23 @@ const ChatSettings = () => {
   }
 
   return (
-    <div className="p-4" style={{ borderBottom: `2px solid ${theme.muted}20` }}>
-      <h3 className="font-pixel text-[8px] mb-3 tracking-wider" style={{ color: theme.muted }}>SETTINGS</h3>
-      <div className="flex flex-col gap-2">
+    <div className="px-4 py-5" style={{ borderBottom: `1px solid ${theme.muted}15` }}>
+      <h3 className="font-body text-sm uppercase tracking-widest mb-3" style={{ color: theme.muted }}>Actions</h3>
+      <div className="flex flex-col gap-1.5">
         <button onClick={handleDelete}
-                className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg font-pixel text-[9px] transition-colors"
-                style={{ background: theme.surfaceLight, color: theme.text, border: `1px solid ${theme.muted}15` }}
-                onMouseEnter={(e) => e.target.style.borderColor = '#e9456040'}
-                onMouseLeave={(e) => e.target.style.borderColor = `${theme.muted}15`}>
-          <IoTrashOutline size={14} style={{ color: '#e94560' }} /> DELETE CHAT
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-body text-lg transition-colors text-left"
+                style={{ color: theme.text }}
+                onMouseEnter={(e) => e.currentTarget.style.background = `${theme.muted}15`}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+          <IoTrashOutline size={18} style={{ color: theme.muted }} /> Delete conversation
         </button>
         <button onClick={handleBlock}
-                className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg font-pixel text-[9px] transition-colors"
-                style={{ background: theme.surfaceLight, color: theme.text, border: `1px solid ${theme.muted}15` }}
-                onMouseEnter={(e) => e.target.style.borderColor = '#e9456040'}
-                onMouseLeave={(e) => e.target.style.borderColor = `${theme.muted}15`}>
-          <MdBlock size={14} style={{ color: '#e94560' }} />
-          {isCurrentUserBlocked ? 'YOU ARE BLOCKED' : isReceiverBlocked ? 'UNBLOCK' : 'BLOCK USER'}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-body text-lg transition-colors text-left"
+                style={{ color: theme.text }}
+                onMouseEnter={(e) => e.currentTarget.style.background = `${theme.muted}15`}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+          <MdBlock size={18} style={{ color: '#e94560' }} />
+          {isCurrentUserBlocked ? 'You are blocked' : isReceiverBlocked ? 'Unblock user' : 'Block user'}
         </button>
       </div>
     </div>

@@ -85,22 +85,22 @@ const Chat = ({ onDetailToggle }) => {
       </div>
 
       {/* Input */}
-      <div className="px-4 py-3 md:px-8" style={{ background: theme.surface, borderTop: `2px solid ${theme.muted}20` }}>
+      <div className="px-4 py-2.5 md:px-6" style={{ background: theme.surface, borderTop: `1px solid ${theme.muted}15` }}>
         {blocked ? (
           <div className="text-center py-3">
-            <span className="font-pixel text-[9px]" style={{ color: theme.primary }}>BLOCKED - CANNOT SEND</span>
+            <span className="font-body text-base" style={{ color: theme.muted }}>You cannot send messages in this chat</span>
           </div>
         ) : (
-          <div className="flex items-end gap-3">
+          <div className="flex items-center gap-2">
             {/* Image upload */}
-            <label htmlFor="chat-file" className="flex-shrink-0 p-2 rounded-xl cursor-pointer transition-colors hover:opacity-80"
-                   style={{ background: `${theme.primary}15` }}>
-              <IoImage size={20} style={{ color: theme.primary }} />
+            <label htmlFor="chat-file" className="flex-shrink-0 p-2 rounded-full cursor-pointer transition-colors hover:opacity-80"
+                   style={{ color: theme.muted }}>
+              <IoImage size={20} />
             </label>
             <input type="file" id="chat-file" onChange={handleImg} className="hidden" />
 
             {/* Text input area */}
-            <div className="flex-1 rounded-2xl overflow-hidden" style={{ background: theme.surfaceLight, border: `1px solid ${theme.muted}20` }}>
+            <div className="flex-1 min-w-0 rounded-2xl overflow-hidden" style={{ background: theme.surfaceLight, border: `1px solid ${theme.muted}20` }}>
               {img.url && (
                 <div className="px-3 pt-3" style={{ borderBottom: `1px solid ${theme.muted}15` }}>
                   <div className="relative inline-block">
@@ -136,37 +136,39 @@ const Chat = ({ onDetailToggle }) => {
             </div>
 
             {/* Emoji */}
-            <button onClick={() => setEmojiOpen(!emojiOpen)}
-                    className="flex-shrink-0 p-2 rounded-xl transition-colors hover:opacity-80"
-                    style={{ background: `${theme.accent}15` }}>
-              <IoLogoOctocat size={20} style={{ color: theme.accent }} />
-            </button>
+            <div className="relative flex-shrink-0">
+              <button onClick={() => setEmojiOpen(!emojiOpen)}
+                      className="p-2 rounded-full transition-colors hover:opacity-80"
+                      style={{ color: theme.muted }}>
+                <IoLogoOctocat size={20} />
+              </button>
+
+              {emojiOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setEmojiOpen(false)} />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-xl overflow-hidden shadow-2xl"
+                       style={{ border: `2px solid ${theme.muted}30` }}>
+                    <EmojiPicker
+                      onEmojiClick={handleEmoji}
+                      theme="dark"
+                      width={280}
+                      height={350}
+                      searchDisabled
+                      skinTonesDisabled
+                      previewConfig={{ showPreview: false }}
+                      lazyLoadEmojis
+                    />
+                  </div>
+                </>
+              )}
+            </div>
 
             {/* Send */}
             <button onClick={handleSend} disabled={isSending}
-                    className="flex-shrink-0 p-3 rounded-xl transition-all hover:scale-105 active:scale-95"
+                    className="flex-shrink-0 p-2.5 rounded-full transition-all hover:scale-105 active:scale-95"
                     style={{ background: theme.primary, color: theme.bg }}>
-              <IoSend size={18} />
+              <IoSend size={16} />
             </button>
-
-            {emojiOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setEmojiOpen(false)} />
-                <div className="absolute bottom-16 right-16 z-50 rounded-xl overflow-hidden shadow-2xl"
-                     style={{ border: `2px solid ${theme.muted}30` }}>
-                  <EmojiPicker
-                    onEmojiClick={handleEmoji}
-                    theme="dark"
-                    width={280}
-                    height={350}
-                    searchDisabled
-                    skinTonesDisabled
-                    previewConfig={{ showPreview: false }}
-                    lazyLoadEmojis
-                  />
-                </div>
-              </>
-            )}
           </div>
         )}
       </div>
