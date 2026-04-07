@@ -1,14 +1,16 @@
 import React from 'react'
 import Paths from './components/Paths'
 import NotiAlert from './components/subComponents/NotiAlert'
-
+import ErrorBoundary from './components/ErrorBoundary'
 
 const App = () => {
   return (
-    <div data-theme="dim" className='relative min-h-screen min-w-screen'>
-      <Paths />
-      <NotiAlert />
-    </div>
+    <ErrorBoundary>
+      <div data-theme="dim" className='relative min-h-screen min-w-screen'>
+        <Paths />
+        <NotiAlert />
+      </div>
+    </ErrorBoundary>
   )
 }
 

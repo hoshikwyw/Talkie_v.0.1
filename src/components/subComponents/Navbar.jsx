@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 const Navbar = () => {
     const { currentUser } = useUserStore()
     const navigate = useNavigate()
-    // console.log(currentUser);
     return (
         <div className="shadow-sm navbar bg-base-100">
             <label htmlFor="my-drawer" className="btn btn-ghost btn-circle btn-primary drawer-button auto lg:hidden"><IoIosMenu size={30} /></label>

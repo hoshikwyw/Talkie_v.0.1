@@ -6,12 +6,12 @@ import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
-  authDomain: "talkie-4f8e6.firebaseapp.com",
-  projectId: "talkie-4f8e6",
-  storageBucket: "talkie-4f8e6.appspot.com",
-  messagingSenderId: "673517837544",
-  appId: "1:673517837544:web:301ee69c5bd94a763d3d5d",
-  measurementId: "G-R6S5Q3HTSV"
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -21,15 +21,25 @@ export const auth = getAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage()
 
-// Google Sign-In helper
+let googleSignInPending = false;
+
 export const signInWithGoogle = async () => {
+  if (googleSignInPending) return;
+  googleSignInPending = true;
+
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
-  const result = await signInWithPopup(auth, provider);
+  let result;
+  try {
+    result = await signInWithPopup(auth, provider);
+  } catch (err) {
+    googleSignInPending = false;
+    throw err;
+  }
+  googleSignInPending = false;
   const user = result.user;
 
-  // Ensure Firestore user documents exist
   const userRef = doc(db, "users", user.uid);
   const userSnap = await getDoc(userRef);
 

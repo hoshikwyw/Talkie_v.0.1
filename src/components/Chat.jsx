@@ -1,31 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ChatHead from './chatComponents/ChatHead'
-import { IoImage, IoCamera, IoMic, IoApps, IoSend, IoLogoOctocat } from "react-icons/io5";
-import YouChat from './chatComponents/YouChat';
-import EmojiPicker from 'emoji-picker-react';
-import { SkinTones } from 'emoji-picker-react';
-import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { useChatStore } from '../lib/chatStore';
-import { useUserStore } from '../lib/userStore';
-import upload from "../lib/upload"
-import SubDetails from './SubDetails';
+import { IoImage, IoSend } from "react-icons/io5"
+import { IoLogoOctocat } from "react-icons/io5"
+import YouChat from './chatComponents/YouChat'
+import EmojiPicker from 'emoji-picker-react'
+import { SkinTones } from 'emoji-picker-react'
+import { useChatStore } from '../lib/chatStore'
+import { useUserStore } from '../lib/userStore'
+import { subscribeToChat, sendMessage } from '../lib/services/chatService'
+import SubDetails from './SubDetails'
 
 const Chat = () => {
-  const textPlaceRef = useRef(null);
+  const textPlaceRef = useRef(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [typeText, setTypeText] = useState('')
   const [isSending, setIsSending] = useState(false)
-  const [isClicked, setIsClicked] = useState(false)
   const [chat, setChat] = useState()
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore()
   const { currentUser } = useUserStore()
-  const [img, setImg] = useState({
-    file: null,
-    url: "",
-  })
-  // console.log(isCurrentUserBlocked,"current user");
-  // console.log(isReceiverBlocked,"receiver");
+  const [img, setImg] = useState({ file: null, url: "" })
 
   const handleEmoji = (e) => {
     setTypeText(prev => prev + e.emoji)
@@ -43,58 +36,29 @@ const Chat = () => {
 
   useEffect(() => {
     if (textPlaceRef.current) {
-      textPlaceRef.current.scrollTop = textPlaceRef.current.scrollHeight;
+      textPlaceRef.current.scrollTop = textPlaceRef.current.scrollHeight
     }
-  }, []);
+  }, [chat?.messages?.length])
 
   useEffect(() => {
-    const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
-      setChat(res.data())
-    })
+    const unSub = subscribeToChat(chatId, setChat)
     return () => { unSub() }
   }, [chatId])
 
   const handleSend = async () => {
-    if (typeText === "") return
+    if (typeText.trim() === "" && !img.file) return
     setIsSending(true)
-    setTypeText("sending ....")
-    setImg({ url: "" })
-    let imgUrl = null
-    // console.log(imgUrl);
+    const textToSend = typeText
+    const imgToSend = img.file
+    setTypeText("")
+    setImg({ file: null, url: "" })
+
     try {
-      if (img.file) {
-        imgUrl = await upload(img.file)
-      }
-      await updateDoc(doc(db, "chats", chatId), {
-        messages: arrayUnion({
-          senderId: currentUser.id,
-          text: typeText,
-          createdAt: new Date(),
-          ...(imgUrl && { img: imgUrl })
-        })
-      })
-      const userIDs = [currentUser.id, user.id]
-      userIDs.forEach(async (id) => {
-        const userChatsRef = doc(db, "userchats", id)
-        const userChatsSnapshot = await getDoc(userChatsRef)
-        if (userChatsSnapshot.exists()) {
-          const userChatsData = userChatsSnapshot.data()
-          const chatIndex = userChatsData.chats.findIndex((item) => item.chatId === chatId)
-          userChatsData.chats[chatIndex].lastMessage = typeText
-          userChatsData.chats[chatIndex].updatedAt = Date.now()
-          userChatsData.chats[chatIndex].isSeen = id === currentUser.id ? true : false
-
-          await updateDoc(userChatsRef, {
-            chats: userChatsData.chats
-          })
-        }
-      })
-
+      await sendMessage(chatId, currentUser, user, textToSend, imgToSend)
     } catch (err) {
-      console.log(err);
+      console.error("Failed to send message:", err)
+      setTypeText(textToSend)
     } finally {
-      setImg({ file: null, url: "" })
-      setTypeText("")
       setIsSending(false)
     }
   }
@@ -102,8 +66,6 @@ const Chat = () => {
   return (
     <div className="w-full drawer">
       <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-
-      {/* Main content */}
       <div className="w-full drawer-content">
         <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100vh-4.4rem)] relative">
           <ChatHead
@@ -112,15 +74,16 @@ const Chat = () => {
             status=""
             className="h-20"
           />
-          <div
-            ref={textPlaceRef}
-            className="p-5 overflow-y-scroll no-scrollbar"
-          >
-            {chat?.messages?.map((message) => (
+          <div ref={textPlaceRef} className="p-5 overflow-y-scroll no-scrollbar">
+            {chat?.messages?.length === 0 && (
+              <div className="flex items-center justify-center h-full text-base-content/50">
+                <p>No messages yet. Say hello!</p>
+              </div>
+            )}
+            {chat?.messages?.map((message, index) => (
               <YouChat
-                key={message.createdAt}
+                key={message.messageId || `${message.senderId}-${index}`}
                 message={message}
-                img={img}
                 user={user}
                 currentUser={currentUser}
               />
@@ -134,11 +97,6 @@ const Chat = () => {
             ) : (
               <div className="flex items-center w-full">
                 <div className="flex items-center">
-                  <div className="tooltip tooltip-error" data-tip="Can't use now">
-                    <button className="btn btn-ghost btn-circle btn-sm">
-                      <IoApps size={20} />
-                    </button>
-                  </div>
                   <label htmlFor="file" className="btn btn-ghost btn-circle btn-sm">
                     <IoImage size={20} />
                   </label>
@@ -148,41 +106,31 @@ const Chat = () => {
                     onChange={handleImg}
                     className="hidden"
                   />
-                  <div className="tooltip tooltip-error" data-tip="Can't use now">
-                    <button className="btn btn-ghost btn-circle btn-sm">
-                      <IoCamera size={20} />
-                    </button>
-                  </div>
-                  <div className="tooltip tooltip-error" data-tip="Can't use now">
-                    <button className="btn btn-ghost btn-circle btn-sm">
-                      <IoMic size={20} />
-                    </button>
-                  </div>
                 </div>
                 <div className="flex items-center px-2 py-1 bg-base-200 rounded-2xl w-[50%] lg:w-[80%] relative">
                   {img.url && (
                     <div className="pt-2 leading-snug image-container size-14">
-                      <img src={img.url} alt="Displayed" />
+                      <img src={img.url} alt="Attached" />
                     </div>
                   )}
                   <textarea
                     className="w-full h-auto px-2 py-1 text-sm leading-snug bg-transparent outline-none resize-none"
-                    placeholder={
-                      isCurrentUserBlocked || isReceiverBlocked
-                        ? "You cannot send a message"
-                        : "Type a message..."
-                    }
+                    placeholder="Type a message..."
                     value={typeText}
                     rows={1}
                     onChange={(e) => setTypeText(e.target.value)}
                     onInput={(e) => {
-                      e.target.style.height = "auto";
-                      e.target.style.height = `${e.target.scrollHeight}px`;
+                      e.target.style.height = "auto"
+                      e.target.style.height = `${e.target.scrollHeight}px`
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSend()
+                      }
                     }}
                   />
-                  <button
-                    className="btn btn-ghost btn-circle btn-sm"
-                  >
+                  <button className="btn btn-ghost btn-circle btn-sm">
                     <IoLogoOctocat
                       size={20}
                       onClick={() => setEmojiOpen(!emojiOpen)}
@@ -215,8 +163,6 @@ const Chat = () => {
           </div>
         </div>
       </div>
-
-      {/* Drawer side full width */}
       <div className="w-full drawer-side">
         <label htmlFor="my-drawer-3" className="drawer-overlay"></label>
         <div className="w-full p-4 menu bg-base-200">
@@ -224,7 +170,6 @@ const Chat = () => {
         </div>
       </div>
     </div>
-
   )
 }
 
