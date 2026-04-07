@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-gutter: auto !important;
+  }
+
+  body {
+    font-family: 'VT323', monospace;
+    background-color: #161625;
+    color: #f0ead6;
+    font-size: 18px;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Press Start 2P', cursive;
+  }
+
+  ::selection {
+    background-color: #ef8354;
+    color: #1e1e2f;
+  }
+}
+
+@layer components {
+  /* Pixel art card style */
+  .pixel-card {
+    @apply bg-surface border-3 border-pixel-cream/10 shadow-pixel rounded-none;
+    image-rendering: pixelated;
+  }
+
+  .pixel-card-hover {
+    @apply pixel-card transition-all duration-100;
+  }
+  .pixel-card-hover:hover {
+    @apply border-pixel-orange/40 shadow-glow-orange -translate-y-0.5;
+  }
+
+  /* Pixel art button */
+  .pixel-btn {
+    @apply font-pixel text-xs px-4 py-2 border-3 border-pixel-cream/20 bg-surface-light
+           text-pixel-cream shadow-pixel-sm rounded-none uppercase tracking-wider
+           transition-all duration-100 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
+  }
+  .pixel-btn-primary {
+    @apply pixel-btn bg-pixel-orange border-pixel-orange/60 text-surface-darker;
+  }
+  .pixel-btn-primary:hover {
+    @apply bg-pixel-yellow border-pixel-yellow/60;
+  }
+  .pixel-btn-ghost {
+    @apply font-body text-base px-3 py-1 bg-transparent border-none shadow-none text-pixel-cream/70
+           hover:text-pixel-cream hover:bg-surface-light/50 rounded-none transition-colors;
+  }
+
+  /* Pixel art input */
+  .pixel-input {
+    @apply font-body text-lg bg-surface-darker border-3 border-pixel-cream/10 text-pixel-cream
+           px-3 py-2 rounded-none outline-none shadow-pixel-inset
+           placeholder:text-pixel-muted/50 focus:border-pixel-orange/50 transition-colors;
+  }
+
+  /* Chat bubbles */
+  .bubble-own {
+    @apply bg-pixel-orange/20 border-2 border-pixel-orange/30 text-pixel-cream;
+  }
+  .bubble-other {
+    @apply bg-surface-light border-2 border-pixel-cream/10 text-pixel-cream;
+  }
+
+  /* Pixel avatar ring */
+  .pixel-avatar {
+    @apply border-3 border-pixel-purple/50 shadow-pixel-sm;
+  }
+  .pixel-avatar-online {
+    @apply border-pixel-green;
+  }
+
+  /* Scrollbar styled */
+  .pixel-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .pixel-scrollbar::-webkit-scrollbar-track {
+    background: #1e1e2f;
+  }
+  .pixel-scrollbar::-webkit-scrollbar-thumb {
+    background: #363650;
+    border: 2px solid #1e1e2f;
+  }
+  .pixel-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #ef8354;
+  }
+
+  /* Pixel divider */
+  .pixel-divider {
+    @apply border-t-3 border-dashed border-pixel-cream/10 my-2;
+  }
+
+  /* Badge */
+  .pixel-badge {
+    @apply font-pixel text-[8px] px-2 py-1 bg-pixel-red text-pixel-cream border-2 border-pixel-red/60 shadow-pixel-sm;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-shadow-pixel {
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+  }
+}
