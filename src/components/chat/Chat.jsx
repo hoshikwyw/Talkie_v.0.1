@@ -11,6 +11,7 @@ import { useThemeStore } from '../../lib/themeStore'
 const Chat = ({ onDetailToggle }) => {
   const scrollRef = useRef(null)
   const inputBarRef = useRef(null)
+  const emojiBtnRef = useRef(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [typeText, setTypeText] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -100,12 +101,14 @@ const Chat = ({ onDetailToggle }) => {
             />
           </div>
 
-          {/* Desktop/tablet: above input bar, right-aligned */}
+          {/* Desktop/tablet: anchored above emoji button */}
           <div className="fixed z-50 rounded-xl overflow-hidden shadow-2xl hidden sm:block"
                style={{
                  border: `1px solid ${theme.muted}20`,
-                 bottom: inputBarRef.current ? inputBarRef.current.offsetHeight + 8 : 60,
-                 right: 24,
+                 ...(emojiBtnRef.current ? {
+                   bottom: window.innerHeight - emojiBtnRef.current.getBoundingClientRect().top + 8,
+                   left: emojiBtnRef.current.getBoundingClientRect().left,
+                 } : { bottom: 60, left: 24 }),
                }}>
             <EmojiPicker
               onEmojiClick={handleEmoji}
@@ -135,7 +138,7 @@ const Chat = ({ onDetailToggle }) => {
                  style={{ background: theme.surfaceLight, border: `1px solid ${theme.muted}15` }}>
 
               {/* Emoji button — left side */}
-              <button onClick={() => setEmojiOpen(!emojiOpen)}
+              <button ref={emojiBtnRef} onClick={() => setEmojiOpen(!emojiOpen)}
                       className="flex-shrink-0 p-3 self-end transition-colors"
                       style={{ color: emojiOpen ? theme.primary : theme.muted }}>
                 <IoHappyOutline size={22} />
