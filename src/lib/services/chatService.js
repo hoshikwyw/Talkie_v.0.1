@@ -15,7 +15,6 @@ import {
   arrayRemove,
 } from "firebase/firestore"
 import { db } from "../firebase"
-import upload from "../upload"
 
 export function subscribeToChat(chatId, callback) {
   return onSnapshot(doc(db, "chats", chatId), (snap) => {
@@ -35,14 +34,9 @@ export function subscribeToUserChats(userId, callback) {
   })
 }
 
-export async function sendMessage(chatId, currentUser, receiverUser, text, imgFile) {
+export async function sendMessage(chatId, currentUser, receiverUser, text) {
   const trimmed = text.trim()
-  if (!trimmed && !imgFile) return
-
-  let imgUrl = null
-  if (imgFile) {
-    imgUrl = await upload(imgFile)
-  }
+  if (!trimmed) return
 
   const messageId = crypto.randomUUID()
 
@@ -52,7 +46,6 @@ export async function sendMessage(chatId, currentUser, receiverUser, text, imgFi
       senderId: currentUser.id,
       text: trimmed,
       createdAt: new Date(),
-      ...(imgUrl && { img: imgUrl }),
     }),
   })
 

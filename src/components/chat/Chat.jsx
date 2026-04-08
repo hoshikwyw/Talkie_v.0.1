@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { IoImage, IoSend } from 'react-icons/io5'
+import { IoSend } from 'react-icons/io5'
 import { IoLogoOctocat } from 'react-icons/io5'
 import ChatHead from './ChatHead'
 import ChatBubble from './ChatBubble'
@@ -11,6 +11,7 @@ import { useThemeStore } from '../../lib/themeStore'
 
 const Chat = ({ onDetailToggle }) => {
   const scrollRef = useRef(null)
+  const emojiBtnRef = useRef(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [typeText, setTypeText] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -19,17 +20,10 @@ const Chat = ({ onDetailToggle }) => {
   const { currentUser } = useUserStore()
   const { getTheme } = useThemeStore()
   const theme = getTheme()
-  const [img, setImg] = useState({ file: null, url: '' })
 
   const handleEmoji = (e) => {
     setTypeText((prev) => prev + e.emoji)
     setEmojiOpen(false)
-  }
-
-  const handleImg = (e) => {
-    if (e.target.files[0]) {
-      setImg({ file: e.target.files[0], url: URL.createObjectURL(e.target.files[0]) })
-    }
   }
 
   useEffect(() => {
@@ -44,14 +38,12 @@ const Chat = ({ onDetailToggle }) => {
   }, [chatId])
 
   const handleSend = async () => {
-    if (typeText.trim() === '' && !img.file) return
+    if (typeText.trim() === '') return
     setIsSending(true)
     const textToSend = typeText
-    const imgToSend = img.file
     setTypeText('')
-    setImg({ file: null, url: '' })
     try {
-      await sendMessage(chatId, currentUser, user, textToSend, imgToSend)
+      await sendMessage(chatId, currentUser, user, textToSend)
     } catch (err) {
       console.error('Failed to send message:', err)
       setTypeText(textToSend)
@@ -89,14 +81,14 @@ const Chat = ({ onDetailToggle }) => {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setEmojiOpen(false)} />
 
-          {/* Mobile: bottom sheet */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden rounded-t-2xl overflow-hidden shadow-2xl"
+          {/* Mobile: fixed bottom sheet */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl overflow-hidden shadow-2xl sm:hidden"
                style={{ border: `1px solid ${theme.muted}20`, borderBottom: 'none' }}>
             <EmojiPicker
               onEmojiClick={handleEmoji}
               theme="dark"
               width="100%"
-              height={300}
+              height={280}
               searchDisabled
               skinTonesDisabled
               previewConfig={{ showPreview: false }}
@@ -104,20 +96,29 @@ const Chat = ({ onDetailToggle }) => {
             />
           </div>
 
-          {/* Desktop/tablet: floating above button */}
-          <div className="hidden sm:block absolute bottom-16 right-8 z-50 rounded-xl overflow-hidden shadow-2xl"
-               style={{ border: `1px solid ${theme.muted}20` }}>
-            <EmojiPicker
-              onEmojiClick={handleEmoji}
-              theme="dark"
-              width={300}
-              height={360}
-              searchDisabled
-              skinTonesDisabled
-              previewConfig={{ showPreview: false }}
-              lazyLoadEmojis
-            />
-          </div>
+          {/* Desktop/tablet: anchored above emoji button */}
+          {emojiBtnRef.current && (() => {
+            const rect = emojiBtnRef.current.getBoundingClientRect()
+            return (
+              <div className="fixed z-50 rounded-xl overflow-hidden shadow-2xl hidden sm:block"
+                   style={{
+                     border: `1px solid ${theme.muted}20`,
+                     bottom: window.innerHeight - rect.top + 8,
+                     right: window.innerWidth - rect.right,
+                   }}>
+                <EmojiPicker
+                  onEmojiClick={handleEmoji}
+                  theme="dark"
+                  width={300}
+                  height={350}
+                  searchDisabled
+                  skinTonesDisabled
+                  previewConfig={{ showPreview: false }}
+                  lazyLoadEmojis
+                />
+              </div>
+            )
+          })()}
         </>
       )}
 
@@ -130,30 +131,9 @@ const Chat = ({ onDetailToggle }) => {
           </div>
         ) : (
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Image upload */}
-            <label htmlFor="chat-file" className="flex-shrink-0 p-2 rounded-full cursor-pointer"
-                   style={{ color: theme.muted }}>
-              <IoImage size={20} />
-            </label>
-            <input type="file" id="chat-file" onChange={handleImg} className="hidden" />
-
             {/* Text input */}
             <div className="flex-1 min-w-0 rounded-2xl overflow-hidden"
                  style={{ background: theme.surfaceLight, border: `1px solid ${theme.muted}15` }}>
-              {img.url && (
-                <div className="px-3 pt-3" style={{ borderBottom: `1px solid ${theme.muted}15` }}>
-                  <div className="relative inline-block">
-                    <img src={img.url} alt="Attached" className="h-14 rounded-lg border border-white/10" />
-                    <button
-                      onClick={() => setImg({ file: null, url: '' })}
-                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-xs flex items-center justify-center"
-                      style={{ background: theme.primary, color: theme.bg }}
-                    >
-                      x
-                    </button>
-                  </div>
-                </div>
-              )}
               <textarea
                 className="bg-transparent outline-none font-body text-lg w-full px-3 py-2.5 sm:px-4 sm:py-3 resize-none"
                 style={{ color: theme.text }}
@@ -175,11 +155,13 @@ const Chat = ({ onDetailToggle }) => {
             </div>
 
             {/* Emoji */}
-            <button onClick={() => setEmojiOpen(!emojiOpen)}
-                    className="flex-shrink-0 p-2 rounded-full"
-                    style={{ color: theme.muted }}>
-              <IoLogoOctocat size={20} />
-            </button>
+            <div className="relative flex-shrink-0" ref={emojiBtnRef}>
+              <button onClick={() => setEmojiOpen(!emojiOpen)}
+                      className="p-2 rounded-full"
+                      style={{ color: theme.muted }}>
+                <IoLogoOctocat size={20} />
+              </button>
+            </div>
 
             {/* Send */}
             <button onClick={handleSend} disabled={isSending}

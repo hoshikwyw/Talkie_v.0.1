@@ -1,14 +1,23 @@
 import Avvvatars from 'avvvatars-react'
+import { useState } from 'react'
 
 const Avatar = ({ avatar, name, size = 40, online = false }) => {
+  const [imgError, setImgError] = useState(false)
+  const showImg = avatar && avatar.trim() !== '' && !imgError
+
   return (
     <div className="relative flex-shrink-0">
       <div
         className="rounded-full overflow-hidden ring-2 ring-white/10"
         style={{ width: size, height: size }}
       >
-        {avatar ? (
-          <img src={avatar} alt={name} className="object-cover w-full h-full" />
+        {showImg ? (
+          <img
+            src={avatar}
+            alt={name}
+            className="object-cover w-full h-full"
+            onError={() => setImgError(true)}
+          />
         ) : (
           <Avvvatars value={name || 'user'} size={size} style="shape" />
         )}

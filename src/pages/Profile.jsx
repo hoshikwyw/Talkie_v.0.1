@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../lib/userStore'
+import { useThemeStore } from '../lib/themeStore'
 import { updateUserProfile } from '../lib/services/userService'
 import { toast } from 'react-toastify'
 import Avatar from '../components/sidebar/Avatar'
@@ -8,18 +9,11 @@ import Avatar from '../components/sidebar/Avatar'
 const Profile = () => {
   const navigate = useNavigate()
   const { currentUser, fetchUserInfo } = useUserStore()
+  const { getTheme } = useThemeStore()
+  const theme = getTheme()
 
   const [username, setUsername] = useState(currentUser?.username || '')
-  const [previewUrl, setPreviewUrl] = useState(currentUser?.profile || '')
-  const [file, setFile] = useState(null)
   const [saving, setSaving] = useState(false)
-
-  const onFileChange = (e) => {
-    const f = e.target.files?.[0]
-    if (!f) return
-    setFile(f)
-    setPreviewUrl(URL.createObjectURL(f))
-  }
 
   const onSave = async (e) => {
     e.preventDefault()
@@ -33,11 +27,7 @@ const Profile = () => {
 
     try {
       setSaving(true)
-      await updateUserProfile(currentUser.id, {
-        username: trimmedName,
-        file,
-        currentProfile: currentUser.profile || previewUrl,
-      })
+      await updateUserProfile(currentUser.id, { username: trimmedName })
       await fetchUserInfo(currentUser.id)
       toast.success('Profile updated!')
       navigate('/')
@@ -50,33 +40,28 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-surface-darker p-4">
-      <div className="pixel-card p-8 w-full max-w-sm">
-        <h1 className="font-pixel text-xs text-pixel-orange text-shadow-pixel text-center mb-6">
+    <div className="flex items-center justify-center min-h-screen p-4" style={{ background: theme.bg }}>
+      <div className="w-full max-w-sm p-8 rounded-xl" style={{ background: theme.surface, border: `1px solid ${theme.muted}15` }}>
+        <h1 className="font-pixel text-xs text-center mb-8" style={{ color: theme.primary }}>
           EDIT PROFILE
         </h1>
 
         <form onSubmit={onSave} className="flex flex-col items-center gap-6">
-          {/* Avatar */}
-          <label htmlFor="profile-file" className="cursor-pointer group">
-            <div className="w-28 h-28 pixel-avatar overflow-hidden bg-surface-light flex items-center justify-center">
-              {previewUrl ? (
-                <img src={previewUrl} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="font-pixel text-[6px] text-pixel-muted group-hover:text-pixel-orange transition-colors">
-                  UPLOAD
-                </span>
-              )}
-            </div>
-          </label>
-          <input id="profile-file" type="file" className="hidden" onChange={onFileChange} />
+          {/* Avatar preview */}
+          <div className="flex flex-col items-center gap-2">
+            <Avatar avatar={currentUser?.profile} name={username || currentUser?.username} size={90} online />
+            <span className="font-body text-sm" style={{ color: theme.muted }}>
+              Avatar updates with your username
+            </span>
+          </div>
 
           {/* Username */}
           <div className="w-full">
-            <label className="font-pixel text-[8px] text-pixel-muted mb-1 block tracking-wider">USERNAME</label>
+            <label className="font-pixel text-[8px] mb-1 block tracking-wider" style={{ color: theme.muted }}>USERNAME</label>
             <input
               type="text"
-              className="pixel-input w-full"
+              className="w-full rounded-xl px-4 py-3 font-body text-lg outline-none"
+              style={{ background: theme.surfaceLight, color: theme.text, border: `1px solid ${theme.muted}15` }}
               placeholder="Your name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -85,10 +70,15 @@ const Profile = () => {
 
           {/* Buttons */}
           <div className="flex gap-3 w-full">
-            <button type="button" className="pixel-btn flex-1" onClick={() => navigate(-1)}>
+            <button type="button"
+                    className="flex-1 px-4 py-2.5 rounded-xl font-pixel text-[9px] transition-colors"
+                    style={{ background: theme.surfaceLight, color: theme.text, border: `1px solid ${theme.muted}15` }}
+                    onClick={() => navigate(-1)}>
               CANCEL
             </button>
-            <button type="submit" className="pixel-btn-primary flex-1" disabled={saving}>
+            <button type="submit" disabled={saving}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-pixel text-[9px] transition-colors"
+                    style={{ background: theme.primary, color: theme.bg }}>
               {saving ? 'SAVING...' : 'SAVE'}
             </button>
           </div>
