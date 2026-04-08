@@ -113,6 +113,17 @@ export async function searchUserByUsername(username) {
   return snap.empty ? null : snap.docs[0].data()
 }
 
+export async function deleteMessage(chatId, message) {
+  const chatRef = doc(db, "chats", chatId)
+  const snap = await getDoc(chatRef)
+  if (!snap.exists()) return
+
+  const messages = snap.data().messages || []
+  const updated = messages.filter((m) => m.messageId !== message.messageId)
+
+  await updateDoc(chatRef, { messages: updated })
+}
+
 export async function deleteChat(chatId) {
   await deleteDoc(doc(db, "chats", chatId))
 }
