@@ -1,3 +1,5 @@
+const DAY_MS = 24 * 60 * 60 * 1000
+
 /**
  * Firestore hands back `Timestamp` objects from live snapshots but plain
  * `Date`s for locally-written messages that have not round-tripped yet.
@@ -14,7 +16,32 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: 'numeric',
 })
 
+const dayFormatter = new Intl.DateTimeFormat(undefined, {
+  weekday: 'long',
+  month: 'short',
+  day: 'numeric',
+})
+
 export function formatMessageTime(value) {
   const date = toDate(value)
   return date ? timeFormatter.format(date) : ''
+}
+
+/** Midnight of the given date, as a timestamp — the grouping key for a day. */
+export function startOfDay(date) {
+  const copy = new Date(date)
+  copy.setHours(0, 0, 0, 0)
+  return copy.getTime()
+}
+
+export function formatDayLabel(value) {
+  const date = toDate(value)
+  if (!date) return ''
+
+  const today = startOfDay(new Date())
+  const day = startOfDay(date)
+
+  if (day === today) return 'Today'
+  if (day === today - DAY_MS) return 'Yesterday'
+  return dayFormatter.format(date)
 }
