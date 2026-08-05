@@ -13,8 +13,8 @@ const PasswordField = (props) => {
       trailing={
         <IconButton
           label={revealed ? 'Hide password' : 'Show password'}
+          aria-pressed={revealed}
           onClick={() => setRevealed((value) => !value)}
-          tabIndex={-1}
         >
           {revealed ? <IoEyeOffOutline size={18} /> : <IoEyeOutline size={18} />}
         </IconButton>

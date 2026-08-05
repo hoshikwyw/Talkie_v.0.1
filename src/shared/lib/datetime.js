@@ -22,9 +22,25 @@ const dayFormatter = new Intl.DateTimeFormat(undefined, {
   day: 'numeric',
 })
 
+const fullFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+})
+
 export function formatMessageTime(value) {
   const date = toDate(value)
   return date ? timeFormatter.format(date) : ''
+}
+
+/** Machine-readable value for a `<time datetime>` attribute. */
+export function toIsoString(value) {
+  return toDate(value)?.toISOString()
+}
+
+/** Full date and time, for the tooltip on a grouped timestamp. */
+export function formatFullTimestamp(value) {
+  const date = toDate(value)
+  return date ? fullFormatter.format(date) : ''
 }
 
 /** Midnight of the given date, as a timestamp — the grouping key for a day. */

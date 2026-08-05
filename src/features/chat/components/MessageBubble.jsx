@@ -3,7 +3,7 @@ import { IoCopyOutline, IoTrashOutline } from 'react-icons/io5'
 import { toast } from 'react-toastify'
 import { Avatar } from '@/shared/ui'
 import { cn } from '@/shared/lib/cn'
-import { formatMessageTime } from '@/shared/lib/datetime'
+import { formatFullTimestamp, formatMessageTime, toIsoString } from '@/shared/lib/datetime'
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
 import { useOnClickOutside } from '@/shared/hooks/useOnClickOutside'
 
@@ -83,10 +83,11 @@ const MessageBubble = ({ message, isOwn, senderName, senderAvatar, endsRun, onDe
               className="mb-2 max-w-[240px] rounded-lg border border-white/10"
             />
           )}
+          {/* A <p> here would be invalid: <button> only accepts phrasing content. */}
           {message.text && (
-            <p className="whitespace-pre-wrap break-words font-body text-[20px] leading-relaxed text-content">
+            <span className="block whitespace-pre-wrap break-words font-body text-[20px] leading-relaxed text-content">
               {message.text}
-            </p>
+            </span>
           )}
         </button>
 
@@ -131,8 +132,13 @@ const MessageBubble = ({ message, isOwn, senderName, senderAvatar, endsRun, onDe
           </div>
         )}
 
+        {/* Grouping hides most timestamps, so the exact one lives in the tooltip. */}
         {endsRun && (
-          <time className="mt-1 px-1 font-body text-[12px] text-muted/90">
+          <time
+            dateTime={toIsoString(message.createdAt)}
+            title={formatFullTimestamp(message.createdAt)}
+            className="mt-1 px-1 font-body text-[12px] text-muted/90"
+          >
             {formatMessageTime(message.createdAt)}
           </time>
         )}
@@ -141,7 +147,25 @@ const MessageBubble = ({ message, isOwn, senderName, senderAvatar, endsRun, onDe
   )
 }
 
-// Named so fast refresh can track it; the list re-renders on every message.
-const MemoizedMessageBubble = memo(MessageBubble)
+/**
+ * A bare `memo()` here did nothing: `snapshot.data()` deserialises new objects
+ * on every Firestore update, so the default shallow compare saw a different
+ * `message` prop each time and re-rendered the whole history per message.
+ *
+ * Messages are immutable once written — deleting removes the element rather
+ * than mutating it — so comparing identity and content is sufficient.
+ */
+const MemoizedMessageBubble = memo(
+  MessageBubble,
+  (previous, next) =>
+    previous.message.messageId === next.message.messageId &&
+    previous.message.text === next.message.text &&
+    previous.message.img === next.message.img &&
+    previous.isOwn === next.isOwn &&
+    previous.endsRun === next.endsRun &&
+    previous.senderName === next.senderName &&
+    previous.senderAvatar === next.senderAvatar &&
+    previous.onDelete === next.onDelete
+)
 
 export default MemoizedMessageBubble

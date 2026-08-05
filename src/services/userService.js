@@ -2,13 +2,17 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from './firebase'
 
 /**
- * Participant profiles are read once and reused.
+ * Participant profiles, cached with a short lifetime.
  *
- * The conversation-list listener re-runs on every message, and it used to
- * `getDoc` every participant each time — N extra reads per message, growing
- * with the number of conversations. Profiles change rarely, so cache them and
- * invalidate on write.
+ * The conversation-list listener re-runs on every message and used to `getDoc`
+ * every participant each time — N extra reads per message, growing with the
+ * number of conversations.
+ *
+ * The cache expires rather than living forever: `invalidateUserCache` only
+ * reaches writes made in this tab, so without a TTL a contact who renamed
+ * themselves elsewhere would show their old name until a full reload.
  */
+const PROFILE_TTL_MS = 5 * 60 * 1000
 const profileCache = new Map()
 
 export async function fetchUser(uid) {
@@ -18,11 +22,12 @@ export async function fetchUser(uid) {
 
 export async function fetchUserCached(uid) {
   if (!uid) return null
-  if (profileCache.has(uid)) return profileCache.get(uid)
+
+  const cached = profileCache.get(uid)
+  if (cached && Date.now() - cached.fetchedAt < PROFILE_TTL_MS) return cached.profile
 
   const profile = await fetchUser(uid)
-  // Only cache hits — a profile that does not exist yet should be retried.
-  if (profile) profileCache.set(uid, profile)
+  profileCache.set(uid, { profile, fetchedAt: Date.now() })
   return profile
 }
 

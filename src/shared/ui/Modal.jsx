@@ -21,7 +21,11 @@ const Modal = ({ open, onClose, title, children, className }) => {
     const previousOverflow = document.body.style.overflow
     const previouslyFocused = document.activeElement
     document.body.style.overflow = 'hidden'
-    panelRef.current?.focus()
+
+    // Only take focus if the content has not already claimed it — otherwise
+    // this runs after mount and steals it back from an autoFocus field.
+    const panel = panelRef.current
+    if (panel && !panel.contains(document.activeElement)) panel.focus()
 
     return () => {
       document.body.style.overflow = previousOverflow

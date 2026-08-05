@@ -204,15 +204,6 @@
     background: rgb(var(--c-muted) / 0.55);
   }
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
   .text-shadow-pixel {
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
   }

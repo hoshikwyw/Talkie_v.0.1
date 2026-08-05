@@ -61,6 +61,7 @@ const AddFriendDialog = ({ open, onClose, currentUser }) => {
       <form onSubmit={handleSearch} className="mb-4 flex items-start gap-2">
         <TextField
           name="username"
+          aria-label="Username to search for"
           autoFocus
           autoComplete="off"
           placeholder="Search username..."
