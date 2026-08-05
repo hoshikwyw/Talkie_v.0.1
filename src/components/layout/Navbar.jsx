@@ -2,7 +2,7 @@ import { IoIosMenu } from 'react-icons/io'
 import { IoLogOutOutline, IoPersonOutline, IoSettingsOutline } from 'react-icons/io5'
 import { auth } from '../../lib/firebase'
 import { useUserStore } from '../../lib/userStore'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 import { useNavigate } from 'react-router-dom'
 import Avatar from '../sidebar/Avatar'
 

@@ -1,5 +1,5 @@
 import Avatar from './Avatar'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const UserInfo = ({ name, avatar, lastMessage, online }) => {
   const { getTheme } = useThemeStore()

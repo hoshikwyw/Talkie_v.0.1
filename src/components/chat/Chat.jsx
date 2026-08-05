@@ -6,7 +6,7 @@ import EmojiPicker from 'emoji-picker-react'
 import { useChatStore } from '../../lib/chatStore'
 import { useUserStore } from '../../lib/userStore'
 import { subscribeToChat, sendMessage } from '../../lib/services/chatService'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const Chat = ({ onDetailToggle }) => {
   const scrollRef = useRef(null)
@@ -60,7 +60,7 @@ const Chat = ({ onDetailToggle }) => {
       <ChatHead name={user?.username || ''} avatar={user?.profile || ''} onDetailToggle={onDetailToggle} />
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto pixel-scrollbar px-3 py-4 sm:px-6 sm:py-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-slim px-3 py-4 sm:px-6 sm:py-6">
         {(!chat?.messages || chat.messages.length === 0) && (
           <div className="flex flex-col items-center justify-center h-full gap-3">
             <span className="font-pixel text-[10px]" style={{ color: theme.muted }}>NO MESSAGES YET</span>

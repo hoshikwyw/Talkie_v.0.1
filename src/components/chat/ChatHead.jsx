@@ -1,7 +1,7 @@
 import { IoArrowBack } from 'react-icons/io5'
 import { IoIosMore } from 'react-icons/io'
 import Avatar from '../sidebar/Avatar'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 import { useChatStore } from '../../lib/chatStore'
 
 const ChatHead = ({ name, avatar, onDetailToggle }) => {

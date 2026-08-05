@@ -1,5 +1,5 @@
 import Avatar from '../sidebar/Avatar'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const UserCard = ({ name, avatar }) => {
   const { getTheme } = useThemeStore()

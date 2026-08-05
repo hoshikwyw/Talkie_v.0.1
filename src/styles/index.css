@@ -2,124 +2,218 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Fallback theme values. `applyTheme` overwrites these on <html> before the
+ * first paint; they exist so the document is never unstyled if JS is slow.
+ */
+:root {
+  --c-canvas: 18 18 31;
+  --c-surface: 26 26 46;
+  --c-surface-light: 37 37 64;
+  --c-primary: 239 131 84;
+  --c-accent: 244 211 94;
+  --c-content: 232 228 217;
+  --c-muted: 107 107 128;
+  --c-danger: 233 69 96;
+  --c-online: 107 203 119;
+
+  --c-bubble-own-from: 249 115 22;
+  --c-bubble-own-to: 234 88 12;
+  --c-bubble-own-border: 251 146 60;
+  --c-bubble-other-from: 71 85 105;
+  --c-bubble-other-to: 51 65 85;
+  --c-bubble-other-border: 100 116 139;
+
+  --bubble-radius-own: 1rem 1rem 0.125rem 1rem;
+  --bubble-radius-other: 1rem 1rem 1rem 0.125rem;
+}
+
 @layer base {
-  * {
-    scrollbar-gutter: auto !important;
+  html {
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    font-family: 'VT323', monospace;
-    background-color: #161625;
-    color: #f0ead6;
+    @apply bg-canvas font-body text-content antialiased;
     font-size: 18px;
     line-height: 1.4;
     letter-spacing: 0.02em;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Press Start 2P', cursive;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-pixel;
+  }
+
+  /*
+   * Screens used `outline-none` on every input with nothing in its place.
+   * One visible, themed focus ring for keyboard users, everywhere.
+   */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary/70 ring-offset-2;
+    --tw-ring-offset-color: rgb(var(--c-canvas));
   }
 
   ::selection {
-    background-color: #ef8354;
-    color: #1e1e2f;
+    background-color: rgb(var(--c-primary));
+    color: rgb(var(--c-canvas));
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--c-muted) / 0.35) transparent;
   }
 }
 
 @layer components {
-  /* Pixel art card style */
-  .pixel-card {
-    @apply bg-surface border-3 border-pixel-cream/10 shadow-pixel rounded-none;
-    image-rendering: pixelated;
+  /* ---- Chat bubbles -------------------------------------------------- */
+
+  .bubble {
+    @apply border px-4 py-2.5 backdrop-blur-sm transition-transform;
   }
 
-  .pixel-card-hover {
-    @apply pixel-card transition-all duration-100;
-  }
-  .pixel-card-hover:hover {
-    @apply border-pixel-orange/40 shadow-glow-orange -translate-y-0.5;
-  }
-
-  /* Pixel art button */
-  .pixel-btn {
-    @apply font-pixel text-xs px-4 py-2 border-3 border-pixel-cream/20 bg-surface-light
-           text-pixel-cream shadow-pixel-sm rounded-none uppercase tracking-wider
-           transition-all duration-100 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
-  }
-  .pixel-btn-primary {
-    @apply pixel-btn bg-pixel-orange border-pixel-orange/60 text-surface-darker;
-  }
-  .pixel-btn-primary:hover {
-    @apply bg-pixel-yellow border-pixel-yellow/60;
-  }
-  .pixel-btn-ghost {
-    @apply font-body text-base px-3 py-1 bg-transparent border-none shadow-none text-pixel-cream/70
-           hover:text-pixel-cream hover:bg-surface-light/50 rounded-none transition-colors;
+  .bubble--own {
+    border-radius: var(--bubble-radius-own);
+    border-color: rgb(var(--c-bubble-own-border) / 0.3);
+    background-image: linear-gradient(
+      to bottom right,
+      rgb(var(--c-bubble-own-from) / 0.25),
+      rgb(var(--c-bubble-own-to) / 0.15)
+    );
   }
 
-  /* Pixel art input */
-  .pixel-input {
-    @apply font-body text-lg bg-surface-darker border-3 border-pixel-cream/10 text-pixel-cream
-           px-3 py-2 rounded-none outline-none shadow-pixel-inset
-           placeholder:text-pixel-muted/50 focus:border-pixel-orange/50 transition-colors;
+  .bubble--other {
+    border-radius: var(--bubble-radius-other);
+    border-color: rgb(var(--c-bubble-other-border) / 0.2);
+    background-image: linear-gradient(
+      to bottom right,
+      rgb(var(--c-bubble-other-from) / 0.3),
+      rgb(var(--c-bubble-other-to) / 0.2)
+    );
   }
 
-  /* Chat bubbles */
-  .bubble-own {
-    @apply bg-pixel-orange/20 border-2 border-pixel-orange/30 text-pixel-cream;
-  }
-  .bubble-other {
-    @apply bg-surface-light border-2 border-pixel-cream/10 text-pixel-cream;
+  /* ---- Surfaces ------------------------------------------------------ */
+
+  .panel {
+    @apply rounded-2xl border border-muted/15 bg-surface;
   }
 
-  /* Pixel avatar ring */
-  .pixel-avatar {
-    @apply border-3 border-pixel-purple/50 shadow-pixel-sm;
-  }
-  .pixel-avatar-online {
-    @apply border-pixel-green;
+  .panel-raised {
+    @apply rounded-2xl border border-muted/20 bg-surface-light shadow-panel;
   }
 
-  /* Scrollbar styled */
-  .pixel-scrollbar::-webkit-scrollbar {
-    width: 5px;
-  }
-  .pixel-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .pixel-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 999px;
-  }
-  .pixel-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-  .pixel-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+  .divider-h {
+    @apply border-t border-muted/15;
   }
 
-  /* Pixel divider */
-  .pixel-divider {
-    @apply border-t-3 border-dashed border-pixel-cream/10 my-2;
+  /* ---- Controls ------------------------------------------------------ */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-transparent
+           px-4 py-2.5 font-pixel text-pixel-xs uppercase transition-all
+           disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97];
   }
 
-  /* Badge */
-  .pixel-badge {
-    @apply font-pixel text-[8px] px-2 py-1 bg-pixel-red text-pixel-cream border-2 border-pixel-red/60 shadow-pixel-sm;
+  .btn-primary {
+    @apply btn bg-primary text-canvas hover:brightness-110;
+  }
+
+  .btn-secondary {
+    @apply btn border-muted/20 bg-surface-light text-content hover:border-muted/40 hover:bg-surface-light/70;
+  }
+
+  .btn-ghost {
+    @apply btn border-transparent bg-transparent text-muted hover:bg-muted/10 hover:text-content;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger/15 text-danger hover:bg-danger/25;
+  }
+
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded-lg p-2 text-muted transition-colors
+           hover:bg-muted/10 hover:text-content disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .field-label {
+    @apply mb-1.5 block font-pixel text-label uppercase tracking-wider text-muted;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-muted/15 bg-surface-light px-4 py-3 font-body text-lg
+           text-content transition-colors placeholder:text-muted/60 hover:border-muted/25
+           focus:border-primary/50;
+  }
+
+  .input-invalid {
+    @apply border-danger/60 focus:border-danger;
+  }
+
+  /* ---- Lists --------------------------------------------------------- */
+
+  /*
+   * Hover was previously done with onMouseEnter/onMouseLeave handlers writing
+   * inline styles. It belongs in CSS.
+   */
+  .list-row {
+    @apply w-full cursor-pointer border-b border-muted/10 border-l-[3px] border-l-transparent
+           px-4 py-2.5 text-left transition-colors hover:bg-muted/10;
+  }
+
+  .list-row--unread {
+    @apply border-l-primary bg-primary/10 hover:bg-primary/[0.16];
+  }
+
+  .menu-item {
+    @apply flex w-full items-center gap-3 px-4 py-3 text-left font-body text-lg
+           text-content transition-colors hover:bg-muted/15 disabled:opacity-50;
+  }
+
+  .menu-item--danger {
+    @apply menu-item text-danger hover:bg-danger/10;
+  }
+
+  /* ---- Overlays ------------------------------------------------------ */
+
+  .backdrop {
+    @apply fixed inset-0 z-40 animate-fade-in bg-black/50 backdrop-blur-sm;
   }
 }
 
 @layer utilities {
+  .scrollbar-slim::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgb(var(--c-muted) / 0.35);
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--c-muted) / 0.55);
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
   .text-shadow-pixel {
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
   }
 }

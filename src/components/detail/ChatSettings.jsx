@@ -2,7 +2,7 @@ import { MdBlock } from 'react-icons/md'
 import { IoTrashOutline } from 'react-icons/io5'
 import { useChatStore } from '../../lib/chatStore'
 import { useUserStore } from '../../lib/userStore'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 import { deleteChat, toggleBlockUser } from '../../lib/services/chatService'
 import { toast } from 'react-toastify'
 

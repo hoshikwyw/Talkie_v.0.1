@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../lib/userStore'
-import { useThemeStore } from '../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 import { updateUserProfile } from '../lib/services/userService'
 import { toast } from 'react-toastify'
 import Avatar from '../components/sidebar/Avatar'

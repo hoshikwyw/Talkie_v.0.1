@@ -3,7 +3,7 @@ import { IoAdd } from 'react-icons/io5'
 import UserInfo from './UserInfo'
 import AddUser from './AddUser'
 import { useChatList } from '../../lib/hooks/useChatList'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const SideList = () => {
   const { chats, modalOpen, setModalOpen, searchTerm, setSearchTerm, handleSelect, currentUser } = useChatList()
@@ -37,7 +37,7 @@ const SideList = () => {
       </div>
 
       {/* Chat list */}
-      <div className="flex-1 overflow-y-auto pixel-scrollbar">
+      <div className="flex-1 overflow-y-auto scrollbar-slim">
         {chats.length === 0 && (
           <div className="flex flex-col items-center py-12 px-4">
             <span className="font-pixel text-[8px]" style={{ color: theme.muted }}>NO CHATS YET</span>

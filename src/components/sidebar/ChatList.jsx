@@ -3,7 +3,7 @@ import { IoAdd } from 'react-icons/io5'
 import UserInfo from './UserInfo'
 import AddUser from './AddUser'
 import { useChatList } from '../../lib/hooks/useChatList'
-import { useThemeStore } from '../../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const ChatList = ({ onClose }) => {
   const { chats, modalOpen, setModalOpen, searchTerm, setSearchTerm, handleSelect, currentUser } = useChatList()
@@ -29,7 +29,7 @@ const ChatList = ({ onClose }) => {
           <IoAdd size={18} />
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto pixel-scrollbar">
+      <div className="flex-1 overflow-y-auto scrollbar-slim">
         {chats.length === 0 && (
           <div className="text-center py-12"><span className="font-pixel text-[8px]" style={{ color: theme.muted }}>NO CHATS</span></div>
         )}

@@ -5,10 +5,10 @@ import Detail from '../components/detail/Detail'
 import SideList from '../components/sidebar/SideList'
 import ChatList from '../components/sidebar/ChatList'
 import { useChatStore } from '../lib/chatStore'
-import { useThemeStore } from '../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const Home = () => {
-  const { chatId, resetChat } = useChatStore()
+  const chatId = useChatStore((state) => state.chatId)
   const { getTheme } = useThemeStore()
   const theme = getTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

@@ -1,34 +1,29 @@
 import { useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from './lib/firebase'
-import { useUserStore } from './lib/userStore'
-import { useThemeStore } from './lib/themeStore'
-import { Routes, Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import ErrorBoundary from './components/layout/ErrorBoundary'
+import { auth } from './lib/firebase'
+import { useUserStore } from './lib/userStore'
+import { getThemeColors } from '@/shared/theme'
 import AuthGuard from './components/layout/AuthGuard'
+import ErrorBoundary from './components/layout/ErrorBoundary'
 import Home from './pages/Home'
 import Login from './pages/Login'
-import Register from './pages/Register'
 import Profile from './pages/Profile'
+import Register from './pages/Register'
 import Settings from './pages/Settings'
 
 const App = () => {
-  const { fetchUserInfo } = useUserStore()
-  const { getTheme } = useThemeStore()
-  const theme = getTheme()
+  const fetchUserInfo = useUserStore((state) => state.fetchUserInfo)
 
-  useEffect(() => {
-    const unSub = onAuthStateChanged(auth, (user) => {
-      fetchUserInfo(user?.uid)
-    })
-    return () => unSub()
-  }, [fetchUserInfo])
+  useEffect(() => onAuthStateChanged(auth, (user) => fetchUserInfo(user?.uid)), [fetchUserInfo])
+
+  const colors = getThemeColors()
 
   return (
     <ErrorBoundary>
-      <div data-theme="pixelcozy" className="min-h-screen" style={{ background: theme.bg }}>
+      <div className="min-h-screen bg-canvas">
         <Routes>
           <Route element={<AuthGuard />}>
             <Route path="/" element={<Home />} />
@@ -38,13 +33,16 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
+
         <ToastContainer
           position="bottom-right"
           theme="dark"
+          autoClose={3000}
           toastStyle={{
-            background: theme.surface,
-            border: `2px solid ${theme.muted}20`,
-            color: theme.text,
+            // Toastify styles through props, so it needs literal colours.
+            background: colors.surfaceLight,
+            border: `1px solid ${colors.muted}33`,
+            color: colors.content,
             fontFamily: '"VT323", monospace',
             fontSize: '18px',
             borderRadius: '12px',

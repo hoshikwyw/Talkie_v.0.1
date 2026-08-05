@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported as isAnalyticsSupported } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -14,7 +14,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Analytics throws in environments without a measurement id or with cookies
+// blocked, which took the whole app down with it. Opt in only when supported.
+isAnalyticsSupported()
+  .then((supported) => supported && getAnalytics(app))
+  .catch(() => {});
 
 export const auth = getAuth(app)
 export const db = getFirestore(app)

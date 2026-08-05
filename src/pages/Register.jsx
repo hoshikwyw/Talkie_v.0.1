@@ -5,7 +5,7 @@ import { auth, signInWithGoogle } from '../lib/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { createUserDocument } from '../lib/services/userService'
 import { useUserStore } from '../lib/userStore'
-import { useThemeStore } from '../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const Register = () => {
   const [loading, setLoading] = useState(false)

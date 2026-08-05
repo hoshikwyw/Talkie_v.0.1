@@ -4,7 +4,7 @@ import { NavLink, Navigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { auth, signInWithGoogle } from '../lib/firebase'
 import { useUserStore } from '../lib/userStore'
-import { useThemeStore } from '../lib/themeStore'
+import { useThemeStore } from '@/shared/theme'
 
 const Login = () => {
   const [loading, setLoading] = useState(false)

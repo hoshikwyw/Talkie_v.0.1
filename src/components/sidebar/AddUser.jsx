@@ -1,18 +1,17 @@
 import { useState } from 'react'
 import { IoMdSearch } from 'react-icons/io'
-import Avatar from './Avatar'
-import { searchUserByUsername, createNewChat } from '../../lib/services/chatService'
 import { toast } from 'react-toastify'
+import Avatar from './Avatar'
+import { createNewChat, searchUserByUsername } from '../../lib/services/chatService'
 
 const AddUser = ({ setModalOpen, currentUser }) => {
-  const [addUser, setAddUser] = useState(null)
+  const [foundUser, setFoundUser] = useState(null)
+  const [hasSearched, setHasSearched] = useState(false)
   const [searching, setSearching] = useState(false)
 
-  const handleAddNewUser = async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleAddNewUser = async () => {
     try {
-      await createNewChat(currentUser.id, addUser.id)
+      await createNewChat(currentUser.id, foundUser.id)
       toast.success('Friend added!')
     } catch (err) {
       console.error('Failed to add user:', err)
@@ -24,63 +23,68 @@ const AddUser = ({ setModalOpen, currentUser }) => {
 
   const handleSearch = async (e) => {
     e.preventDefault()
-    const formData = new FormData(e.target)
-    const username = formData.get('username')?.trim()
+    const username = new FormData(e.target).get('username')?.trim()
     if (!username) return
+
     setSearching(true)
     try {
-      const found = await searchUserByUsername(username)
-      setAddUser(found)
+      setFoundUser(await searchUserByUsername(username))
     } catch (err) {
       console.error('Search failed:', err)
+      setFoundUser(null)
+      toast.error('Search failed')
     } finally {
+      setHasSearched(true)
       setSearching(false)
     }
   }
 
   return (
     <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setModalOpen(false)} />
+      <div className="backdrop" onClick={() => setModalOpen(false)} />
 
-      {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div className="pixel-card p-5 w-full max-w-sm">
-          <h3 className="font-pixel text-xs text-pixel-orange mb-4 text-shadow-pixel">+ ADD FRIEND</h3>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="panel-raised w-full max-w-sm animate-slide-up p-5">
+          <h3 className="mb-4 font-pixel text-pixel-md text-primary text-shadow-pixel">
+            + Add Friend
+          </h3>
 
-          <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+          <form onSubmit={handleSearch} className="mb-4 flex gap-2">
             <input
               type="text"
               name="username"
+              autoFocus
               placeholder="Search username..."
-              className="pixel-input flex-1 text-base"
+              className="input flex-1"
             />
-            <button type="submit" className="pixel-btn-primary !px-3" disabled={searching}>
+            <button type="submit" className="btn-primary !px-3.5" disabled={searching} aria-label="Search">
               <IoMdSearch size={18} />
             </button>
           </form>
 
-          {addUser && (
-            <div className="flex items-center justify-between bg-surface-dark p-3 border-2 border-pixel-cream/10">
-              <div className="flex items-center gap-3">
-                <Avatar avatar={addUser.profile} name={addUser.username} size={32} />
-                <span className="font-body text-lg">{addUser.username}</span>
+          {foundUser ? (
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-muted/15 bg-surface p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Avatar avatar={foundUser.profile} name={foundUser.username} size={32} />
+                <span className="truncate font-body text-lg text-content">{foundUser.username}</span>
               </div>
-              <button className="pixel-btn-primary !text-[10px] !px-3 !py-1" onClick={handleAddNewUser}>
-                ADD
+              <button type="button" className="btn-primary !px-3 !py-1.5" onClick={handleAddNewUser}>
+                Add
               </button>
             </div>
-          )}
-
-          {addUser === null && !searching && (
-            <p className="text-pixel-muted font-body text-center py-4">
-              Search for a user to add
+          ) : (
+            <p className="py-4 text-center font-body text-muted">
+              {searching
+                ? 'Searching...'
+                : hasSearched
+                  ? 'No user found with that name'
+                  : 'Search for a user to add'}
             </p>
           )}
 
-          <div className="flex justify-end mt-4">
-            <button className="pixel-btn !text-[10px]" onClick={() => setModalOpen(false)}>
-              CANCEL
+          <div className="mt-4 flex justify-end">
+            <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>
+              Cancel
             </button>
           </div>
         </div>
