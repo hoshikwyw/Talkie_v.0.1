@@ -1,156 +1,97 @@
-# Walkie Talkie
+# Talkie
 
 A real-time chat application with a cozy pixel-art inspired design, built with React and Firebase.
 
 ## Features
 
-- **Real-time messaging** — Messages sync instantly via Firestore listeners
-- **Google & Email authentication** — Sign in with Google or create an account with email/password
-- **Image sharing** — Upload and share images in chat via Firebase Storage
-- **User blocking** — Block/unblock users with bidirectional detection
-- **Emoji picker** — Quick emoji insertion in messages
-- **Customizable themes** — 5 color themes (Midnight, Sakura, Forest, Ocean, Ember)
-- **Customizable chat bubbles** — 4 bubble styles (Modern, Pixel, Cloud, Sharp)
-- **Profile management** — Update username and profile photo
-- **Search** — Filter conversations by username
-- **Responsive** — Mobile-first with slide-over panels for sidebar and chat details
-- **Persistent preferences** — Theme and bubble style saved to localStorage
+- **Real-time messaging** — messages sync instantly via Firestore listeners
+- **Google & email authentication** — sign in with Google or an email/password account
+- **Message grouping** — consecutive messages from one sender collapse into a single turn, with day separators
+- **Message actions** — copy any message, delete your own
+- **User blocking** — block/unblock with bidirectional detection
+- **Emoji picker** — loaded on demand, not in the initial bundle
+- **Five colour themes** — Midnight, Sakura, Forest, Ocean, Ember
+- **Four bubble styles** — Modern, Pixel, Cloud, Sharp
+- **Search** — filter conversations by username
+- **Responsive** — one sidebar component serves the desktop column and the mobile slide-over
+- **Persistent preferences** — theme and bubble style saved to `localStorage`
 
-## Tech Stack
+## Tech stack
 
-| Layer            | Technology                                      |
-| ---------------- | ----------------------------------------------- |
-| Framework        | React 18                                        |
-| Build Tool       | Vite 5                                          |
-| Styling          | Tailwind CSS 3 + DaisyUI 4 (custom theme)       |
-| State Management | Zustand 4                                       |
-| Routing          | React Router DOM 6                              |
-| Backend          | Firebase (Auth, Firestore, Storage)              |
-| Fonts            | Press Start 2P (headings), VT323 (body)          |
-| UI Libraries     | react-icons, emoji-picker-react, avvvatars-react |
-| Notifications    | react-toastify                                   |
+| Layer     | Technology                                       |
+| --------- | ------------------------------------------------ |
+| Framework | React 18                                         |
+| Build     | Vite 5                                           |
+| Styling   | Tailwind CSS 3, themed with CSS variables        |
+| State     | Zustand 4                                        |
+| Routing   | React Router 6                                   |
+| Backend   | Firebase (Auth, Firestore)                       |
+| Fonts     | Press Start 2P (headings), VT323 (body)          |
+| UI        | react-icons, emoji-picker-react, avvvatars-react |
+| Toasts    | react-toastify                                   |
 
-## Project Structure
+## Getting started
+
+```bash
+npm install
+cp .env.example .env   # fill in your Firebase project credentials
+npm run dev
+```
+
+| Script            | Description                     |
+| ----------------- | ------------------------------- |
+| `npm run dev`     | Start the dev server            |
+| `npm run build`   | Production build into `dist/`   |
+| `npm run preview` | Serve the production build      |
+| `npm run lint`    | ESLint, zero warnings tolerated |
+
+## Project structure
 
 ```
 src/
-├── pages/                          # Route-level page components
-│   ├── Home.jsx                    # Main chat layout (sidebar + chat + detail)
-│   ├── Login.jsx                   # Login page with email & Google auth
-│   ├── Register.jsx                # Registration page with validation
-│   ├── Profile.jsx                 # Edit profile (username, avatar)
-│   └── Settings.jsx                # Theme & bubble style customization
-│
-├── components/
-│   ├── layout/                     # App-level layout components
-│   │   ├── Navbar.jsx              # Top navigation bar with user dropdown
-│   │   ├── AuthGuard.jsx           # Route protection (redirects if unauthenticated)
-│   │   └── ErrorBoundary.jsx       # React error boundary with fallback UI
-│   │
-│   ├── chat/                       # Chat-related components
-│   │   ├── Chat.jsx                # Chat view (messages list + input bar)
-│   │   ├── ChatBubble.jsx          # Individual message bubble with timestamp
-│   │   └── ChatHead.jsx            # Chat header (user info + online status)
-│   │
-│   ├── sidebar/                    # Sidebar & user list components
-│   │   ├── SideList.jsx            # Desktop sidebar chat list
-│   │   ├── ChatList.jsx            # Mobile slide-over chat list
-│   │   ├── AddUser.jsx             # Search & add new friend modal
-│   │   ├── UserInfo.jsx            # Chat list item (avatar + name + last message)
-│   │   └── Avatar.jsx              # Reusable avatar component with online indicator
-│   │
-│   └── detail/                     # Chat detail panel components
-│       ├── Detail.jsx              # Detail panel wrapper
-│       ├── UserCard.jsx            # User profile card (avatar + name)
-│       ├── ChatSettings.jsx        # Delete chat & block user actions
-│       └── SharedImgs.jsx          # Shared photos gallery
-│
-├── lib/
-│   ├── firebase.js                 # Firebase initialization & Google sign-in
-│   ├── upload.js                   # Firebase Storage file upload helper
-│   ├── userStore.js                # Zustand store for current user state
-│   ├── chatStore.js                # Zustand store for active chat state
-│   ├── themeStore.js               # Zustand store for theme & bubble preferences
-│   │
-│   ├── services/                   # Firebase business logic (extracted from components)
-│   │   ├── chatService.js          # Chat CRUD, subscriptions, transactions
-│   │   └── userService.js          # User CRUD, profile updates
-│   │
-│   └── hooks/                      # Custom React hooks
-│       └── useChatList.js          # Shared hook for chat list (used by SideList & ChatList)
-│
-├── styles/
-│   └── index.css                   # Global styles, Tailwind directives, custom components
-│
-├── App.jsx                         # Root component (auth listener, routes, toast)
-└── main.jsx                        # Entry point (React DOM render + BrowserRouter)
+├── app/          Application shell — routes, header, home layout
+├── features/     One folder per product area
+│   ├── auth/     Sign in, sign up, route guard
+│   ├── chat/     Conversation panel, messages, detail panel
+│   ├── contacts/ Conversation list, add friend
+│   ├── profile/  Profile editor
+│   └── settings/ Theme and bubble style
+├── services/     Firebase client and data access (auth, chat, user)
+├── shared/       Cross-feature code
+│   ├── ui/       Presentational primitives
+│   ├── hooks/    Reusable behaviour
+│   ├── lib/      Pure helpers (dates, validation, class names)
+│   └── theme/    Design tokens and the theme store
+├── stores/       Zustand stores (user, active chat, chat list)
+└── styles/       Tailwind entry and component layer
 ```
 
-## Getting Started
+Imports use the `@/` alias for `src/`, configured in both `vite.config.js` and `jsconfig.json`.
 
-### Prerequisites
+### Conventions
 
-- Node.js 18+
-- A Firebase project with Authentication, Firestore, and Storage enabled
+- **Features do not import each other's internals.** `app/` composes features; anything genuinely shared moves to `shared/`.
+- **Components do not talk to Firebase.** All reads and writes go through `services/`.
+- **Components do not read colour values in JavaScript.** Themes are CSS variables — use the Tailwind utilities (`bg-surface`, `text-muted`, `border-muted/15`) so a theme change costs no renders.
 
-### Setup
+## Theming
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/hoshikwyw/talkie.git
-   cd talkie
-   ```
+`src/shared/theme/tokens.js` holds every theme as plain data. `applyTheme` converts the hex values into `R G B` triplets and writes them to `<html>` as CSS variables, which `tailwind.config.js` maps onto the colour scale. Switching a theme is a variable write rather than a re-render, and opacity modifiers keep working (`bg-primary/20`).
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+To add a theme, add one entry to `THEMES` — no component changes are needed.
 
-3. Create a `.env` file from the example:
-   ```bash
-   cp .env.example .env
-   ```
+## Data model
 
-4. Fill in your Firebase config values in `.env`:
-   ```
-   VITE_API_KEY=your_api_key
-   VITE_AUTH_DOMAIN=your_project.firebaseapp.com
-   VITE_PROJECT_ID=your_project_id
-   VITE_STORAGE_BUCKET=your_project.appspot.com
-   VITE_MESSAGING_SENDER_ID=your_sender_id
-   VITE_APP_ID=your_app_id
-   VITE_MEASUREMENT_ID=your_measurement_id
-   ```
+```
+users/{userId}       { id, username, email, profile, blocked: string[] }
+chats/{chatId}       { createdAt, messages: Message[] }
+userchats/{userId}   { chats: ChatSummary[] }
+```
 
-5. Start the development server:
-   ```bash
-   npm run dev
-   ```
+`ChatSummary` is the sidebar row: `{ chatId, receiverId, lastMessage, updatedAt, isSeen }`. Every mutation of one goes through a transaction in `services/chatService.js`, so a concurrent message cannot clobber a read receipt.
 
-### Firebase Setup
+The conversation list is backed by a single reference-counted Firestore listener in `stores/chatListStore.js`, shared by every consumer.
 
-Enable the following in your Firebase Console:
+### Known limitation
 
-- **Authentication** — Enable Email/Password and Google sign-in providers
-- **Cloud Firestore** — Create database with the following collections:
-  - `users` — User profiles (`username`, `email`, `profile`, `id`, `blocked[]`)
-  - `userchats` — Per-user chat references (`chats[]` with `chatId`, `receiverId`, `lastMessage`, `updatedAt`, `isSeen`)
-  - `chats` — Chat documents (`messages[]`, `createdAt`)
-- **Storage** — Enable for image uploads
-
-## Available Scripts
-
-| Command           | Description                |
-| ----------------- | -------------------------- |
-| `npm run dev`     | Start dev server           |
-| `npm run build`   | Production build           |
-| `npm run preview` | Preview production build   |
-| `npm run lint`    | Run ESLint                 |
-
-## Architecture Highlights
-
-- **Service layer** — All Firestore operations are in `chatService.js` and `userService.js`, keeping components clean
-- **Firestore transactions** — Message sending uses `runTransaction` to prevent race conditions when updating `userchats`
-- **Global auth listener** — Single `onAuthStateChanged` in `App.jsx` keeps the user store in sync across all routes
-- **Theme system** — Zustand store with 5 themes and 4 bubble styles, persisted to localStorage, applied via inline styles for instant switching
-- **Shared hooks** — `useChatList` deduplicates logic between desktop sidebar and mobile chat list
+`messages` is an array on a single document, so each send rewrites the whole array and a long conversation will eventually reach Firestore's 1 MB document limit. The fix is a `messages` subcollection with pagination, which needs a migration and a backfill.

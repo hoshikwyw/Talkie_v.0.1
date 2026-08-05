@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import ChatPanel from '@/features/chat/components/ChatPanel'
 import ConversationDetail from '@/features/chat/components/ConversationDetail'
 import ChatSidebar from '@/features/contacts/components/ChatSidebar'
 import { useChatStore } from '@/stores/chatStore'
 import { cn } from '@/shared/lib/cn'
+import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
 import AppHeader from '../components/AppHeader'
 
 const WelcomePanel = () => (
@@ -32,6 +33,13 @@ const HomePage = () => {
   const chatId = useChatStore((state) => state.chatId)
   const [menuOpen, setMenuOpen] = useState(false)
   const [detailOpen, setDetailOpen] = useState(false)
+
+  // The slide-overs could only be dismissed by clicking the backdrop.
+  const closePanels = useCallback(() => {
+    setMenuOpen(false)
+    setDetailOpen(false)
+  }, [])
+  useEscapeKey(closePanels, menuOpen || detailOpen)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-canvas">

@@ -34,15 +34,12 @@ const legacy = readLegacyPrefs()
 
 export const useThemeStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       themeName: legacy.themeName ?? DEFAULT_THEME,
       bubbleStyle: legacy.bubbleStyle ?? DEFAULT_BUBBLE_STYLE,
 
       setTheme: (themeName) => set({ themeName }),
       setBubbleStyle: (bubbleStyle) => set({ bubbleStyle }),
-
-      /** @deprecated see `legacyThemeShim`. */
-      getTheme: () => legacyThemeShim(get().themeName),
     }),
     {
       name: STORAGE_KEY,
@@ -68,23 +65,3 @@ export const bubbleStyleCatalogue = BUBBLE_STYLES
  * @deprecated Prefer Tailwind utilities backed by the theme variables.
  */
 export const getThemeColors = () => resolveTheme(useThemeStore.getState().themeName).colors
-
-/**
- * Legacy accessor kept so components still driving colour through inline
- * `style` props keep working while they are migrated to utility classes.
- *
- * @deprecated Being removed screen by screen. Use `bg-surface`, `text-muted`,
- * `border-muted/15` and friends instead of reading hex values in JS.
- */
-export function legacyThemeShim(themeName) {
-  const c = resolveTheme(themeName).colors
-  return {
-    bg: c.canvas,
-    surface: c.surface,
-    surfaceLight: c.surfaceLight,
-    primary: c.primary,
-    accent: c.accent,
-    text: c.content,
-    muted: c.muted,
-  }
-}

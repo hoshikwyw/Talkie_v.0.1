@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { observeAuthState } from '@/services/authService'
+import { useChatStore } from '@/stores/chatStore'
 import { useUserStore } from '@/stores/userStore'
 import { getThemeColors } from '@/shared/theme'
 import { ErrorBoundary } from '@/shared/ui'
@@ -10,7 +11,16 @@ import AppRoutes from './routes'
 const App = () => {
   const fetchUserInfo = useUserStore((state) => state.fetchUserInfo)
 
-  useEffect(() => observeAuthState((user) => fetchUserInfo(user?.uid)), [fetchUserInfo])
+  useEffect(
+    () =>
+      observeAuthState((user) => {
+        // Signing out left the open conversation in the store, so the next
+        // person to sign in on this device landed in the previous one's chat.
+        if (!user) useChatStore.getState().resetChat()
+        fetchUserInfo(user?.uid)
+      }),
+    [fetchUserInfo]
+  )
 
   const colors = getThemeColors()
 
