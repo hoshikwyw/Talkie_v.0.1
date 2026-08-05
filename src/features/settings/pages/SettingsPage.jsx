@@ -1,6 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
 import { bubbleStyleCatalogue, themeCatalogue, useThemeStore } from '@/shared/theme'
+import { IconButton } from '@/shared/ui'
+
+const SettingsSection = ({ title, children, className }) => (
+  <section className={className}>
+    <h2 className="mb-4 font-pixel text-pixel-xs uppercase tracking-wider text-muted">{title}</h2>
+    {children}
+  </section>
+)
 
 /**
  * Swatch for a theme that is not currently active, so its colours cannot come
@@ -101,21 +109,18 @@ const SettingsPage = () => {
     <div className="min-h-screen bg-canvas px-4 py-8">
       <div className="mx-auto max-w-lg">
         <header className="mb-8 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-            className="icon-btn bg-surface-light text-content"
+          {/* `navigate(-1)` did nothing when Settings was opened directly. */}
+          <IconButton
+            label="Back to chats"
+            onClick={() => navigate('/')}
+            className="bg-surface-light text-content"
           >
             <IoArrowBack size={20} />
-          </button>
+          </IconButton>
           <h1 className="font-pixel text-pixel-md text-primary">Settings</h1>
         </header>
 
-        <section className="mb-8">
-          <h2 className="mb-4 font-pixel text-pixel-xs uppercase tracking-wider text-muted">
-            Colour theme
-          </h2>
+        <SettingsSection title="Colour theme" className="mb-8">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {Object.entries(themeCatalogue).map(([key, theme]) => (
               <ThemeSwatch
@@ -126,12 +131,9 @@ const SettingsPage = () => {
               />
             ))}
           </div>
-        </section>
+        </SettingsSection>
 
-        <section className="mb-8">
-          <h2 className="mb-4 font-pixel text-pixel-xs uppercase tracking-wider text-muted">
-            Chat bubble style
-          </h2>
+        <SettingsSection title="Chat bubble style" className="mb-8">
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(bubbleStyleCatalogue).map(([key, style]) => (
               <BubbleSwatch
@@ -142,12 +144,9 @@ const SettingsPage = () => {
               />
             ))}
           </div>
-        </section>
+        </SettingsSection>
 
-        <section>
-          <h2 className="mb-4 font-pixel text-pixel-xs uppercase tracking-wider text-muted">
-            Live preview
-          </h2>
+        <SettingsSection title="Live preview">
           <div className="overflow-hidden rounded-xl border-2 border-muted/20 bg-canvas">
             <div className="flex items-center gap-3 border-b border-muted/20 bg-surface px-4 py-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary font-pixel text-[8px] text-canvas">
@@ -177,7 +176,7 @@ const SettingsPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </SettingsSection>
       </div>
     </div>
   )

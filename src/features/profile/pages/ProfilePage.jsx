@@ -1,86 +1,84 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useUserStore } from '@/stores/userStore'
-import { useThemeStore } from '@/shared/theme'
-import { updateUserProfile } from '@/services/userService'
 import { toast } from 'react-toastify'
-import { Avatar } from '@/shared/ui'
+import { updateUserProfile } from '@/services/userService'
+import { useUserStore } from '@/stores/userStore'
+import { Avatar, Button, TextField } from '@/shared/ui'
+import { USERNAME_MAX, validateUsername } from '@/shared/lib/validation'
 
 const ProfilePage = () => {
   const navigate = useNavigate()
-  const { currentUser, fetchUserInfo } = useUserStore()
-  const { getTheme } = useThemeStore()
-  const theme = getTheme()
+  const currentUser = useUserStore((state) => state.currentUser)
+  const fetchUserInfo = useUserStore((state) => state.fetchUserInfo)
 
-  const [username, setUsername] = useState(currentUser?.username || '')
+  const [username, setUsername] = useState(currentUser?.username ?? '')
+  const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
 
-  const onSave = async (e) => {
-    e.preventDefault()
+  const trimmed = username.trim()
+  const isUnchanged = trimmed === (currentUser?.username ?? '')
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
     if (!currentUser?.id) return
 
-    const trimmedName = username.trim()
-    if (trimmedName.length < 2 || trimmedName.length > 30) {
-      toast.error('Username must be 2-30 characters')
-      return
-    }
+    // The rule used to live inline here and disagree with the sign-up form.
+    const validationError = validateUsername(username)
+    if (validationError) return setError(validationError)
 
+    setSaving(true)
     try {
-      setSaving(true)
-      await updateUserProfile(currentUser.id, { username: trimmedName })
+      await updateUserProfile(currentUser.id, { username: trimmed })
       await fetchUserInfo(currentUser.id)
       toast.success('Profile updated!')
       navigate('/')
     } catch (err) {
       console.error('Profile update failed:', err)
-      toast.error(err.message || 'Failed to update')
+      toast.error('Could not save your profile')
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4" style={{ background: theme.bg }}>
-      <div className="w-full max-w-sm p-8 rounded-xl" style={{ background: theme.surface, border: `1px solid ${theme.muted}15` }}>
-        <h1 className="font-pixel text-xs text-center mb-8" style={{ color: theme.primary }}>
-          EDIT PROFILE
-        </h1>
+    <div className="flex min-h-screen items-center justify-center bg-canvas p-4">
+      <div className="panel w-full max-w-sm p-8">
+        <h1 className="mb-8 text-center font-pixel text-pixel-md text-primary">Edit Profile</h1>
 
-        <form onSubmit={onSave} className="flex flex-col items-center gap-6">
-          {/* Avatar preview */}
+        <form onSubmit={handleSubmit} className="flex flex-col items-center gap-6" noValidate>
           <div className="flex flex-col items-center gap-2">
-            <Avatar avatar={currentUser?.profile} name={username || currentUser?.username} size={90} online />
-            <span className="font-body text-sm" style={{ color: theme.muted }}>
-              Avatar updates with your username
-            </span>
-          </div>
-
-          {/* Username */}
-          <div className="w-full">
-            <label className="font-pixel text-[8px] mb-1 block tracking-wider" style={{ color: theme.muted }}>USERNAME</label>
-            <input
-              type="text"
-              className="w-full rounded-xl px-4 py-3 font-body text-lg outline-none"
-              style={{ background: theme.surfaceLight, color: theme.text, border: `1px solid ${theme.muted}15` }}
-              placeholder="Your name"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+            {/* Reflects the typed name live, since it seeds the fallback avatar. */}
+            <Avatar
+              avatar={currentUser?.profile}
+              name={trimmed || currentUser?.username}
+              size={90}
+              online
             />
+            <span className="font-body text-sm text-muted">Avatar follows your username</span>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 w-full">
-            <button type="button"
-                    className="flex-1 px-4 py-2.5 rounded-xl font-pixel text-[9px] transition-colors"
-                    style={{ background: theme.surfaceLight, color: theme.text, border: `1px solid ${theme.muted}15` }}
-                    onClick={() => navigate(-1)}>
-              CANCEL
-            </button>
-            <button type="submit" disabled={saving}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-pixel text-[9px] transition-colors"
-                    style={{ background: theme.primary, color: theme.bg }}>
-              {saving ? 'SAVING...' : 'SAVE'}
-            </button>
+          <TextField
+            label="Username"
+            className="w-full"
+            name="username"
+            autoComplete="nickname"
+            maxLength={USERNAME_MAX}
+            placeholder="Your name"
+            value={username}
+            error={error}
+            onChange={(event) => {
+              setUsername(event.target.value)
+              setError(null)
+            }}
+          />
+
+          <div className="flex w-full gap-3">
+            <Button variant="secondary" fullWidth onClick={() => navigate('/')}>
+              Cancel
+            </Button>
+            <Button type="submit" fullWidth loading={saving} disabled={isUnchanged}>
+              Save
+            </Button>
           </div>
         </form>
       </div>

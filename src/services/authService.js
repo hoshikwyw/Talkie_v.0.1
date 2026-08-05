@@ -14,8 +14,11 @@ import { createUserDocument } from './userService'
 
 export const observeAuthState = (callback) => onAuthStateChanged(auth, callback)
 
-export const signInWithEmail = (email, password) =>
-  signInWithEmailAndPassword(auth, email, password)
+/** All three sign-in functions resolve to a Firebase `User`. */
+export async function signInWithEmail(email, password) {
+  const { user } = await signInWithEmailAndPassword(auth, email, password)
+  return user
+}
 
 export const signOutCurrentUser = () => signOut(auth)
 
