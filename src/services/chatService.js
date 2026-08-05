@@ -1,135 +1,231 @@
 import {
+  arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
-  deleteDoc,
   onSnapshot,
   query,
   runTransaction,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where,
-  arrayRemove,
-} from "firebase/firestore"
-import { db } from "./firebase"
+  writeBatch,
+} from 'firebase/firestore'
+import { db } from './firebase'
+import { fetchUserCached } from './userService'
 
-export function subscribeToChat(chatId, callback) {
-  return onSnapshot(doc(db, "chats", chatId), (snap) => {
-    callback(snap.data())
+/**
+ * Data model
+ *
+ *   chats/{chatId}        { createdAt, messages: Message[] }
+ *   userchats/{userId}    { chats: ChatSummary[] }
+ *
+ * `messages` is an array on a single document, so every write rewrites the
+ * whole array and a busy conversation will eventually hit Firestore's 1 MB
+ * document limit. Moving messages to a subcollection is the real fix; it is a
+ * schema migration and deliberately out of scope here.
+ */
+
+const chatRef = (chatId) => doc(db, 'chats', chatId)
+const userChatsRef = (userId) => doc(db, 'userchats', userId)
+
+/**
+ * Read-modify-write of one summary inside a user's `chats` array, under a
+ * transaction so a concurrent message cannot be clobbered.
+ */
+async function patchChatSummary(userId, chatId, patch, { touch = true } = {}) {
+  await runTransaction(db, async (transaction) => {
+    const ref = userChatsRef(userId)
+    const snapshot = await transaction.get(ref)
+    if (!snapshot.exists()) return
+
+    const chats = snapshot.data().chats ?? []
+    const index = chats.findIndex((entry) => entry.chatId === chatId)
+    if (index === -1) return
+
+    const next = [...chats]
+    next[index] = { ...next[index], ...patch, ...(touch ? { updatedAt: Date.now() } : null) }
+    transaction.update(ref, { chats: next })
   })
 }
 
-export function subscribeToUserChats(userId, callback) {
-  return onSnapshot(doc(db, "userchats", userId), async (res) => {
-    const items = res.data()?.chats || []
-    const promises = items.map(async (item) => {
-      const userDocSnap = await getDoc(doc(db, "users", item.receiverId))
-      return { ...item, user: userDocSnap.data() }
-    })
-    const chatData = await Promise.all(promises)
-    callback(chatData.sort((a, b) => b.updatedAt - a.updatedAt))
+/** Removes a conversation from one user's index. */
+async function removeChatSummary(userId, chatId) {
+  await runTransaction(db, async (transaction) => {
+    const ref = userChatsRef(userId)
+    const snapshot = await transaction.get(ref)
+    if (!snapshot.exists()) return
+
+    const chats = snapshot.data().chats ?? []
+    const next = chats.filter((entry) => entry.chatId !== chatId)
+    if (next.length === chats.length) return
+
+    transaction.update(ref, { chats: next })
   })
 }
 
-export async function sendMessage(chatId, currentUser, receiverUser, text) {
-  const trimmed = text.trim()
-  if (!trimmed) return
+/* ------------------------------------------------------------------ reads */
 
-  const messageId = crypto.randomUUID()
-
-  await updateDoc(doc(db, "chats", chatId), {
-    messages: arrayUnion({
-      messageId,
-      senderId: currentUser.id,
-      text: trimmed,
-      createdAt: new Date(),
-    }),
-  })
-
-  const userIds = [currentUser.id, receiverUser.id]
-  await Promise.all(
-    userIds.map((id) =>
-      runTransaction(db, async (transaction) => {
-        const userChatsRef = doc(db, "userchats", id)
-        const snap = await transaction.get(userChatsRef)
-        if (!snap.exists()) return
-
-        const chats = snap.data().chats
-        const chatIndex = chats.findIndex((item) => item.chatId === chatId)
-        if (chatIndex === -1) return
-
-        chats[chatIndex].lastMessage = trimmed
-        chats[chatIndex].updatedAt = Date.now()
-        chats[chatIndex].isSeen = id === currentUser.id
-
-        transaction.update(userChatsRef, { chats })
-      })
-    )
+export function subscribeToChat(chatId, onData, onError) {
+  return onSnapshot(
+    chatRef(chatId),
+    (snapshot) => onData(snapshot.data() ?? null),
+    (error) => {
+      console.error('Chat subscription failed:', error)
+      onError?.(error)
+    }
   )
 }
 
-export async function markChatAsSeen(userId, chats, chatId) {
-  const cleanChats = chats.map(({ user, ...rest }) => rest)
-  const chatIndex = cleanChats.findIndex((item) => item.chatId === chatId)
-  if (chatIndex === -1) return
-  cleanChats[chatIndex].isSeen = true
+export function subscribeToUserChats(userId, onData, onError) {
+  return onSnapshot(
+    userChatsRef(userId),
+    async (snapshot) => {
+      const summaries = snapshot.data()?.chats ?? []
 
-  await updateDoc(doc(db, "userchats", userId), { chats: cleanChats })
+      const chats = await Promise.all(
+        summaries.map(async (summary) => ({
+          ...summary,
+          user: await fetchUserCached(summary.receiverId),
+        }))
+      )
+
+      // `updatedAt` is absent on conversations created before the first
+      // message, and undefined arithmetic sorted them randomly.
+      onData(chats.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0)))
+    },
+    (error) => {
+      console.error('Conversation list subscription failed:', error)
+      onError?.(error)
+    }
+  )
 }
 
+export async function searchUserByUsername(username, excludeUserId) {
+  const snapshot = await getDocs(query(collection(db, 'users'), where('username', '==', username)))
+
+  // Without this you could find, and then add, yourself.
+  return snapshot.docs.map((entry) => entry.data()).find((user) => user.id !== excludeUserId) ?? null
+}
+
+/* ----------------------------------------------------------------- writes */
+
+export async function sendMessage(chatId, currentUser, receiverUser, text) {
+  const trimmed = text.trim()
+  if (!trimmed) return null
+
+  const message = {
+    messageId: crypto.randomUUID(),
+    senderId: currentUser.id,
+    text: trimmed,
+    // `serverTimestamp()` is not allowed inside an array element, so the
+    // sender's clock is the best available source here.
+    createdAt: new Date(),
+  }
+
+  await updateDoc(chatRef(chatId), { messages: arrayUnion(message) })
+
+  await Promise.all([
+    patchChatSummary(currentUser.id, chatId, { lastMessage: trimmed, isSeen: true }),
+    receiverUser?.id
+      ? patchChatSummary(receiverUser.id, chatId, { lastMessage: trimmed, isSeen: false })
+      : null,
+  ])
+
+  return message
+}
+
+export async function markChatAsSeen(userId, chatId) {
+  await patchChatSummary(userId, chatId, { isSeen: true }, { touch: false })
+}
+
+/**
+ * Adding the same friend twice used to create a second conversation. Returns
+ * `{ chatId, created }` so the caller can tell the two cases apart.
+ */
 export async function createNewChat(currentUserId, otherUserId) {
-  const chatRef = doc(collection(db, "chats"))
-  await setDoc(chatRef, {
-    createdAt: serverTimestamp(),
-    messages: [],
-  })
+  if (currentUserId === otherUserId) {
+    throw new Error('You cannot start a conversation with yourself')
+  }
 
-  const userChatsRef = collection(db, "userchats")
-  await updateDoc(doc(userChatsRef, otherUserId), {
-    chats: arrayUnion({
-      chatId: chatRef.id,
-      lastMessage: "",
-      receiverId: currentUserId,
-      updatedAt: Date.now(),
-    }),
-  })
-  await updateDoc(doc(userChatsRef, currentUserId), {
-    chats: arrayUnion({
-      chatId: chatRef.id,
-      lastMessage: "",
-      receiverId: otherUserId,
-      updatedAt: Date.now(),
-    }),
-  })
+  const existing = await getDoc(userChatsRef(currentUserId))
+  const duplicate = (existing.data()?.chats ?? []).find((entry) => entry.receiverId === otherUserId)
+  if (duplicate) return { chatId: duplicate.chatId, created: false }
+
+  const newChatRef = doc(collection(db, 'chats'))
+  const summary = { chatId: newChatRef.id, lastMessage: '', updatedAt: Date.now() }
+
+  // One batch, so a failure cannot leave the conversation on one side only.
+  const batch = writeBatch(db)
+  batch.set(newChatRef, { createdAt: serverTimestamp(), messages: [] })
+  batch.set(
+    userChatsRef(currentUserId),
+    { chats: arrayUnion({ ...summary, receiverId: otherUserId, isSeen: true }) },
+    { merge: true }
+  )
+  batch.set(
+    userChatsRef(otherUserId),
+    { chats: arrayUnion({ ...summary, receiverId: currentUserId, isSeen: false }) },
+    { merge: true }
+  )
+  await batch.commit()
+
+  return { chatId: newChatRef.id, created: true }
 }
 
-export async function searchUserByUsername(username) {
-  const userRef = collection(db, "users")
-  const q = query(userRef, where("username", "==", username))
-  const snap = await getDocs(q)
-  return snap.empty ? null : snap.docs[0].data()
+/**
+ * Deletes the conversation document *and* both index entries.
+ *
+ * Only the document was deleted before, so the conversation stayed in both
+ * sidebars forever and opening it subscribed to a document that no longer
+ * exists.
+ */
+export async function deleteChat(chatId, participantIds = []) {
+  const ids = new Set(participantIds.filter(Boolean))
+
+  // Each summary records the other participant, so a conversation with someone
+  // whose profile we do not hold — a user who blocked us — is still cleaned up
+  // on both sides.
+  for (const userId of [...ids]) {
+    const snapshot = await getDoc(userChatsRef(userId))
+    const summary = (snapshot.data()?.chats ?? []).find((entry) => entry.chatId === chatId)
+    if (summary?.receiverId) ids.add(summary.receiverId)
+  }
+
+  await Promise.all([...ids].map((userId) => removeChatSummary(userId, chatId)))
+  await deleteDoc(chatRef(chatId))
 }
 
-export async function deleteMessage(chatId, message) {
-  const chatRef = doc(db, "chats", chatId)
-  const snap = await getDoc(chatRef)
-  if (!snap.exists()) return
+export async function deleteMessage(chatId, message, participantIds = []) {
+  const remaining = await runTransaction(db, async (transaction) => {
+    const ref = chatRef(chatId)
+    const snapshot = await transaction.get(ref)
+    if (!snapshot.exists()) return null
 
-  const messages = snap.data().messages || []
-  const updated = messages.filter((m) => m.messageId !== message.messageId)
+    const messages = snapshot.data().messages ?? []
+    const next = messages.filter((entry) => entry.messageId !== message.messageId)
+    if (next.length === messages.length) return null
 
-  await updateDoc(chatRef, { messages: updated })
-}
+    transaction.update(ref, { messages: next })
+    return next
+  })
 
-export async function deleteChat(chatId) {
-  await deleteDoc(doc(db, "chats", chatId))
+  if (!remaining) return
+
+  // The sidebar kept showing a deleted message as the conversation preview.
+  const lastMessage = remaining[remaining.length - 1]?.text ?? ''
+  await Promise.all(
+    participantIds
+      .filter(Boolean)
+      .map((userId) => patchChatSummary(userId, chatId, { lastMessage }, { touch: false }))
+  )
 }
 
 export async function toggleBlockUser(currentUserId, targetUserId, isBlocked) {
-  await updateDoc(doc(db, "users", currentUserId), {
+  await updateDoc(doc(db, 'users', currentUserId), {
     blocked: isBlocked ? arrayRemove(targetUserId) : arrayUnion(targetUserId),
   })
 }

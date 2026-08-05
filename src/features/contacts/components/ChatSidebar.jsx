@@ -22,8 +22,17 @@ const SkeletonRow = () => (
  * apart in markup and behaviour. `onClose` is what makes it a drawer.
  */
 const ChatSidebar = ({ onClose }) => {
-  const { chats, totalChats, isLoading, searchTerm, setSearchTerm, selectChat, activeChatId, currentUser } =
-    useChatList()
+  const {
+    chats,
+    totalChats,
+    isLoading,
+    error,
+    searchTerm,
+    setSearchTerm,
+    selectChat,
+    activeChatId,
+    currentUser,
+  } = useChatList()
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const handleSelect = async (chat) => {
@@ -63,7 +72,17 @@ const ChatSidebar = ({ onClose }) => {
       </header>
 
       <div className="scrollbar-slim flex-1 overflow-y-auto">
-        {isLoading ? (
+        {error ? (
+          <EmptyState
+            title="Could not load chats"
+            description="Check your connection and try again."
+            action={
+              <Button size="sm" variant="secondary" onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+            }
+          />
+        ) : isLoading ? (
           <>
             <SkeletonRow />
             <SkeletonRow />

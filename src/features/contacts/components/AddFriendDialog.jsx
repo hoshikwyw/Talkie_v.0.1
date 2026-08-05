@@ -27,7 +27,7 @@ const AddFriendDialog = ({ open, onClose, currentUser }) => {
 
     setSearching(true)
     try {
-      setFoundUser(await searchUserByUsername(username))
+      setFoundUser(await searchUserByUsername(username, currentUser?.id))
     } catch (err) {
       console.error('Search failed:', err)
       setFoundUser(null)
@@ -41,12 +41,14 @@ const AddFriendDialog = ({ open, onClose, currentUser }) => {
   const handleAdd = async () => {
     setAdding(true)
     try {
-      await createNewChat(currentUser.id, foundUser.id)
-      toast.success(`${foundUser.username} added!`)
+      const { created } = await createNewChat(currentUser.id, foundUser.id)
+      toast.success(
+        created ? `${foundUser.username} added!` : `You already have a chat with ${foundUser.username}`
+      )
       handleClose()
     } catch (err) {
       console.error('Failed to add user:', err)
-      toast.error('Failed to add friend')
+      toast.error(err.message || 'Failed to add friend')
     } finally {
       setAdding(false)
     }

@@ -32,9 +32,10 @@ const ConversationActions = () => {
 
   const handleDelete = async () => {
     setBusy(true)
+    const participantIds = [currentUser?.id, user?.id]
     try {
       resetChat()
-      await deleteChat(chatId)
+      await deleteChat(chatId, participantIds)
       toast.success('Conversation deleted')
     } catch (err) {
       console.error('Failed to delete conversation:', err)

@@ -20,7 +20,7 @@ const MessageBubble = ({ message, user, currentUser }) => {
   const handleDelete = async () => {
     setDeleting(true)
     try {
-      await deleteMessage(chatId, message)
+      await deleteMessage(chatId, message, [currentUser?.id, user?.id])
       toast.success('Message deleted')
     } catch (err) {
       console.error('Failed to delete message:', err)

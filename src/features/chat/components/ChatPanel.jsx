@@ -33,8 +33,8 @@ const ChatPanel = ({ onDetailToggle }) => {
   }, [chat?.messages?.length])
 
   useEffect(() => {
-    const unSub = subscribeToChat(chatId, setChat)
-    return () => unSub()
+    if (!chatId) return undefined
+    return subscribeToChat(chatId, setChat, () => setChat(null))
   }, [chatId])
 
   const handleSend = async () => {
