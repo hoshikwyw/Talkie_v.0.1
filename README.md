@@ -95,6 +95,44 @@ Login* fails:
 If sign-in fails with `DEVELOPER_ERROR` or status code 10, the SHA-1 does not
 match the one registered for this package name.
 
+### Icons and splash screen
+
+`assets/` holds the sources; everything under `android/app/src/main/res` is
+generated from them and should not be edited by hand:
+
+```bash
+npx @capacitor/assets generate --android --assetPath assets --androidProject android
+```
+
+The current mark is a placeholder built to match the app's palette — replace
+`assets/icon-only.png`, `assets/icon-foreground.png` and `assets/splash*.png`
+with real artwork and re-run the command. Keep `icon-foreground.png` inside the
+centre safe zone: Android masks adaptive icons to a circle, squircle or
+rounded square depending on the launcher, and anything near the edge is cropped.
+
+### Release build
+
+Signing material lives in `android/keystore.properties`, which is gitignored —
+see `android/keystore.properties.example`. Without it a release build still
+succeeds and produces an unsigned APK, so a fresh clone is never blocked.
+
+```bash
+keytool -genkey -v -keystore talkie-release.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias talkie
+
+cp android/keystore.properties.example android/keystore.properties   # then fill in
+
+npm run mobile:build
+cd android && ./gradlew bundleRelease      # .aab for the Play Store
+```
+
+Never commit the keystore. It cannot be rotated: losing it means you can no
+longer publish updates to the same listing, and leaking it lets someone else
+publish as you.
+
+Register the release key's SHA-1 in the Firebase console as well, or Google
+sign-in will work in debug and fail in production.
+
 ## Project structure
 
 ```
