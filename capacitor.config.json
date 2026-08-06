@@ -1,0 +1,8 @@
+{
+  "appId": "com.talkie.app",
+  "appName": "Talkie",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}

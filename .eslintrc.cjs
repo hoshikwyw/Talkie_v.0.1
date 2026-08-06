@@ -7,7 +7,9 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
   ],
-  ignorePatterns: ['dist', 'node_modules', '.eslintrc.cjs'],
+  // `cap sync` copies the built bundle into android/, so that tree must be
+  // excluded or eslint reports hundreds of errors from minified output.
+  ignorePatterns: ['dist', 'node_modules', 'android', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: 'detect' } },
   plugins: ['react-refresh'],
