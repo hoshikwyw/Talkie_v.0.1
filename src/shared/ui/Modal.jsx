@@ -37,7 +37,7 @@ const Modal = ({ open, onClose, title, children, className }) => {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="backdrop" onClick={onClose} />
+      <div className="backdrop z-0" onClick={onClose} />
       <div
         ref={panelRef}
         role="dialog"

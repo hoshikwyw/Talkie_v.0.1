@@ -180,8 +180,14 @@
 
   /* ---- Overlays ------------------------------------------------------ */
 
+  /*
+   * Deliberately carries no z-index: the correct stacking level depends on
+   * what it sits under, and every call site must set it. Baking in `z-40` put
+   * the backdrop above the dialog panel, so the blur landed on the dialog and
+   * the backdrop swallowed its clicks.
+   */
   .backdrop {
-    @apply fixed inset-0 z-40 animate-fade-in bg-black/50 backdrop-blur-sm;
+    @apply fixed inset-0 animate-fade-in bg-black/50 backdrop-blur-sm;
   }
 }
 

@@ -62,7 +62,7 @@ const HomePage = () => {
 
         {menuOpen && (
           <>
-            <div className="backdrop lg:hidden" onClick={() => setMenuOpen(false)} />
+            <div className="backdrop z-40 lg:hidden" onClick={() => setMenuOpen(false)} />
             <div className="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[320px] animate-slide-in-left shadow-panel lg:hidden">
               <ChatSidebar onClose={() => setMenuOpen(false)} />
             </div>
@@ -81,7 +81,7 @@ const HomePage = () => {
 
         {detailOpen && chatId && (
           <>
-            <div className="backdrop xl:hidden" onClick={() => setDetailOpen(false)} />
+            <div className="backdrop z-40 xl:hidden" onClick={() => setDetailOpen(false)} />
             <div className="fixed inset-y-0 right-0 z-50 w-[85vw] max-w-[320px] animate-slide-in-right bg-surface shadow-panel xl:hidden">
               <ConversationDetail onClose={() => setDetailOpen(false)} />
             </div>
