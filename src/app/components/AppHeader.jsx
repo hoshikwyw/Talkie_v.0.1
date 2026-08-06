@@ -7,7 +7,10 @@ const AppHeader = ({ onMenuClick }) => {
   const currentUser = useUserStore((state) => state.currentUser)
 
   return (
-    <header className="flex items-center justify-between border-b-2 border-muted/20 bg-surface px-4 py-3 sm:px-5">
+    // Edge to edge on Android 15+, so the header sits under the status bar
+    // unless it carries the inset. `calc` keeps the design padding on top of
+    // the inset rather than replacing it — the inset is 0 on the web.
+    <header className="flex items-center justify-between border-b-2 border-muted/20 bg-surface px-4 pb-3 pt-[calc(0.75rem+var(--safe-area-inset-top))] sm:px-5">
       <div className="flex items-center gap-3">
         <IconButton label="Open conversations" onClick={onMenuClick} className="lg:hidden">
           <IoIosMenu size={24} />

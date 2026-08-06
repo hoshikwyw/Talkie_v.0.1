@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { IoClose } from 'react-icons/io5'
 import { cn } from '@/shared/lib/cn'
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
+import { useBackButton } from '@/shared/platform/backButton'
 import IconButton from './IconButton'
 
 /**
@@ -14,6 +15,12 @@ const Modal = ({ open, onClose, title, children, className }) => {
   const panelRef = useRef(null)
 
   useEscapeKey(onClose, open)
+
+  // Android back dismisses the dialog rather than leaving the screen behind it.
+  useBackButton(() => {
+    onClose()
+    return true
+  }, open)
 
   useEffect(() => {
     if (!open) return

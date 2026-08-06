@@ -16,7 +16,10 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.5.0",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/splash-screen": "^8.0.2",
     "avvvatars-react": "^0.4.2",
     "emoji-picker-react": "^4.11.1",
     "firebase": "^10.12.3",

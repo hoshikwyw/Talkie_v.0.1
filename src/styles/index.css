@@ -26,9 +26,30 @@
 
   --bubble-radius-own: 1rem 1rem 0.125rem 1rem;
   --bubble-radius-other: 1rem 1rem 1rem 0.125rem;
+
+  /*
+   * Capacitor draws the app edge to edge and overwrites these on <html> with
+   * the real status bar / gesture bar sizes. The zeroes are what the browser
+   * build sees, so the same utilities are safe on both.
+   */
+  --safe-area-inset-top: 0px;
+  --safe-area-inset-right: 0px;
+  --safe-area-inset-bottom: 0px;
+  --safe-area-inset-left: 0px;
 }
 
 @layer base {
+  /*
+   * An explicit height chain, so `h-full` on the chat shell tracks the WebView
+   * when Android resizes it for the soft keyboard. `h-screen` (100vh) does not
+   * shrink, which would hide the composer behind the keyboard.
+   */
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
   html {
     -webkit-tap-highlight-color: transparent;
   }

@@ -28,6 +28,13 @@ export default {
         danger: themed('danger'),
         online: themed('online'),
       },
+      // Safe-area utilities: `pt-safe-top`, `pb-safe-bottom`, `h-safe-top`, …
+      spacing: {
+        'safe-top': 'var(--safe-area-inset-top)',
+        'safe-right': 'var(--safe-area-inset-right)',
+        'safe-bottom': 'var(--safe-area-inset-bottom)',
+        'safe-left': 'var(--safe-area-inset-left)',
+      },
       fontSize: {
         // The pixel face only stays legible at a handful of sizes — name them
         // so screens stop inventing one-off `text-[8px]` values.

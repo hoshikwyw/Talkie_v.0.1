@@ -71,7 +71,7 @@ const ChatSidebar = ({ onClose }) => {
         </div>
       </header>
 
-      <div className="scrollbar-slim flex-1 overflow-y-auto">
+      <div className="scrollbar-slim flex-1 overflow-y-auto pb-safe-bottom">
         {error ? (
           <EmptyState
             title="Could not load chats"

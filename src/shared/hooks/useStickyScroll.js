@@ -32,5 +32,18 @@ export function useStickyScroll(dependency) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dependency, scrollToBottom])
 
+  /*
+   * Android resizes the WebView when the soft keyboard opens, which shortens
+   * the container and leaves the latest message hidden above the fold. Same
+   * handler covers a browser window resize.
+   */
+  useEffect(() => {
+    if (!isPinned) return undefined
+
+    const onResize = () => scrollToBottom('auto')
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [isPinned, scrollToBottom])
+
   return { containerRef, isPinned, scrollToBottom, handleScroll }
 }

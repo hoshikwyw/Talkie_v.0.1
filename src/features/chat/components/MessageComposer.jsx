@@ -41,7 +41,7 @@ const MessageComposer = ({ onSend, disabled = false, disabledReason }) => {
 
   if (disabled) {
     return (
-      <div className="border-t border-muted/15 bg-surface px-4 py-4 text-center">
+      <div className="border-t border-muted/15 bg-surface px-4 pb-[calc(1rem+var(--safe-area-inset-bottom))] pt-4 text-center">
         <span className="font-body text-base text-muted">{disabledReason}</span>
       </div>
     )
@@ -50,7 +50,7 @@ const MessageComposer = ({ onSend, disabled = false, disabledReason }) => {
   return (
     <div
       ref={containerRef}
-      className="relative border-t border-muted/15 bg-surface px-3 py-2 sm:px-4 sm:py-2.5"
+      className="relative border-t border-muted/15 bg-surface px-3 pb-[calc(0.5rem+var(--safe-area-inset-bottom))] pt-2 sm:px-4 sm:pt-2.5"
     >
       {emojiOpen && (
         <EmojiPickerPopover
