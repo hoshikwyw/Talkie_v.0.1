@@ -45,6 +45,56 @@ npm run dev
 | `npm run preview` | Serve the production build      |
 | `npm run lint`    | ESLint, zero warnings tolerated |
 
+## Android
+
+The same codebase ships as an Android app through Capacitor. The native project
+in `android/` is committed and is edited like any other source.
+
+| Script                 | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `npm run mobile:build` | Build the web app and sync it into Android   |
+| `npm run mobile:run`   | Build, install and launch on a device        |
+| `npm run mobile:live`  | Run against the dev server with live reload  |
+| `npm run mobile:open`  | Open the project in Android Studio           |
+
+Requires a JDK 21 and the Android SDK (platform 36). iOS is not set up: it needs
+macOS and Xcode, so `npx cap add ios` is a job for a Mac.
+
+### Google sign-in on device
+
+`signInWithPopup` cannot work inside a WebView — there is no opener window for
+the result to post back to. On Android the app runs Google's native sign-in
+sheet through `@capacitor-firebase/authentication`, takes the ID token it
+returns and exchanges it for a JS SDK session. `skipNativeAuth` is enabled so
+the plugin does not open a second, separate session on the native layer: the
+Firebase JS SDK stays the only source of auth truth, which is what Firestore,
+the auth observer and the route guard all read.
+
+Email and password sign-in needs none of this and works through the JS SDK on
+both platforms.
+
+**This needs configuration that is not in the repository.** Until it is done,
+the Android build still compiles and email sign-in works, but tapping *Google
+Login* fails:
+
+1. Firebase console → **Project settings** → **Your apps** → **Add app** →
+   Android.
+2. Package name: `com.talkie.app`.
+3. Add your debug signing certificate **SHA-1**. Print it with:
+   ```bash
+   keytool -list -v -keystore ~/.android/debug.keystore \
+     -alias androiddebugkey -storepass android -keypass android
+   ```
+   Add the release keystore's SHA-1 too when you publish — a release build
+   signed with a different key is rejected until its fingerprint is registered.
+4. Download `google-services.json` into `android/app/`. The Gradle plugin is
+   applied only when that file is present, which is why the build works
+   without it.
+5. Rebuild: `npm run mobile:build && npm run mobile:run`.
+
+If sign-in fails with `DEVELOPER_ERROR` or status code 10, the SHA-1 does not
+match the one registered for this package name.
+
 ## Project structure
 
 ```

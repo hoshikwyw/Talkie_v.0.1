@@ -1,5 +1,4 @@
 import { initializeApp } from 'firebase/app'
-import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
@@ -19,10 +18,17 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 
-// Analytics throws where it is unsupported or cookies are blocked, which used
-// to take the whole app down with it. Opt in only when the SDK says it is safe.
-isAnalyticsSupported()
-  .then((supported) => supported && getAnalytics(app))
+/*
+ * Analytics is loaded off the critical path and only where it is supported.
+ *
+ * It threw outright where cookies are blocked, taking the app down with it,
+ * and importing it eagerly put the whole module in the startup bundle for a
+ * feature that contributes nothing to first paint.
+ */
+import('firebase/analytics')
+  .then(async ({ getAnalytics, isSupported }) => {
+    if (await isSupported()) getAnalytics(app)
+  })
   .catch(() => {})
 
 export const auth = getAuth(app)

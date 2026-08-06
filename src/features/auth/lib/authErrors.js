@@ -17,13 +17,35 @@ const MESSAGES = {
   'auth/account-exists-with-different-credential':
     'That email is already registered with a different sign-in method.',
   'auth/operation-not-allowed': 'That sign-in method is not enabled.',
+  'auth/native-no-credential': 'Google did not return a sign-in token. Please try again.',
 }
 
-/** Closing the popup is a decision, not a failure — nothing to report. */
+/** Backing out of a sign-in sheet is a decision, not a failure. */
 const SILENT = new Set(['auth/popup-closed-by-user', 'auth/cancelled-popup-request'])
+
+/**
+ * Android's Google Sign-In reports through numeric status codes rather than
+ * Firebase codes, and they arrive as free text on the error message.
+ */
+const NATIVE_PATTERNS = [
+  { match: /12501|cancell?ed|canceled by user/i, message: null },
+  { match: /network/i, message: 'Network error — check your connection.' },
+  {
+    match: /DEVELOPER_ERROR|status code:?\s*10\b/i,
+    message:
+      'Google sign-in is not configured for this build. The app’s SHA-1 fingerprint must be registered in the Firebase console.',
+  },
+  { match: /12500|SIGN_IN_FAILED/i, message: 'Google sign-in failed. Please try again.' },
+]
 
 /** @returns {string | null} message to show, or null to stay quiet. */
 export function authErrorMessage(error) {
   if (SILENT.has(error?.code)) return null
-  return MESSAGES[error?.code] ?? 'Something went wrong. Please try again.'
+  if (MESSAGES[error?.code]) return MESSAGES[error.code]
+
+  const text = `${error?.code ?? ''} ${error?.message ?? ''}`
+  const native = NATIVE_PATTERNS.find(({ match }) => match.test(text))
+  if (native) return native.message
+
+  return 'Something went wrong. Please try again.'
 }
