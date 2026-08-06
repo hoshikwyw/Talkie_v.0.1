@@ -69,10 +69,23 @@ async function removeChatSummary(userId, chatId) {
 
 /* ------------------------------------------------------------------ reads */
 
+/**
+ * @param onData receives `{ exists, fromCache, messages }`.
+ *
+ * A deleted conversation and an empty one both used to arrive as `null`, so a
+ * chat whose document was gone rendered as "no messages yet" and invited a
+ * reply that could only fail. `fromCache` matters because an offline snapshot
+ * reports a document as absent before the server has answered.
+ */
 export function subscribeToChat(chatId, onData, onError) {
   return onSnapshot(
     chatRef(chatId),
-    (snapshot) => onData(snapshot.data() ?? null),
+    (snapshot) =>
+      onData({
+        exists: snapshot.exists(),
+        fromCache: snapshot.metadata.fromCache,
+        messages: snapshot.data()?.messages ?? [],
+      }),
     (error) => {
       console.error('Chat subscription failed:', error)
       onError?.(error)
@@ -126,7 +139,15 @@ export async function sendMessage(chatId, currentUser, receiverUser, text) {
     createdAt: new Date(),
   }
 
-  await updateDoc(chatRef(chatId), { messages: arrayUnion(message) })
+  try {
+    await updateDoc(chatRef(chatId), { messages: arrayUnion(message) })
+  } catch (error) {
+    // The conversation document was deleted, most likely by the other party.
+    if (error.code === 'not-found') {
+      error.userMessage = 'This conversation no longer exists.'
+    }
+    throw error
+  }
 
   await Promise.all([
     patchChatSummary(currentUser.id, chatId, { lastMessage: trimmed, isSeen: true }),

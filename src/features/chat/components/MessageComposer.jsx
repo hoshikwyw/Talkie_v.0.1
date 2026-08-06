@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { IoHappyOutline, IoSend } from 'react-icons/io5'
+import { toast } from 'react-toastify'
 import { IconButton, Spinner } from '@/shared/ui'
 import { cn } from '@/shared/lib/cn'
 import { useAutoResizeTextarea } from '@/shared/hooks/useAutoResizeTextarea'
@@ -29,6 +30,8 @@ const MessageComposer = ({ onSend, disabled = false, disabledReason }) => {
       await onSend(pending)
     } catch (err) {
       console.error('Failed to send message:', err)
+      // The draft reappearing with no explanation read as the app losing it.
+      toast.error(err.userMessage ?? 'Message not sent — please try again')
       setText(pending)
     } finally {
       setSending(false)
