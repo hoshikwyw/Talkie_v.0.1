@@ -110,6 +110,31 @@ with real artwork and re-run the command. Keep `icon-foreground.png` inside the
 centre safe zone: Android masks adaptive icons to a circle, squircle or
 rounded square depending on the launcher, and anything near the edge is cropped.
 
+### Offline behaviour
+
+Firestore runs with a persistent on-disk cache (`persistentLocalCache` with the
+multi-tab manager), so the app opens with its cached conversations instead of an
+empty list whenever connectivity drops.
+
+What that means in practice:
+
+| Action              | Offline                                                |
+| ------------------- | ------------------------------------------------------ |
+| Reading a chat      | Works, from cache                                      |
+| Sending a message   | Queued locally, appears immediately, replays on reconnect |
+| Deleting            | Fails — transactions need a server round trip          |
+| Blocking a user     | Fails — same reason                                    |
+
+Sending is **optimistic**: `sendMessage` returns `{ message, settled }` and the
+composer never awaits `settled`. With a persistent cache a write promise
+resolves only when the *server* acknowledges it, so awaiting it would leave the
+send button spinning until the device reconnected. The write reaches the local
+cache synchronously, the snapshot listener renders it, and `settled` is used
+only to report a genuine failure.
+
+An offline banner sits under the header, because a message that looks sent but
+has not left the device is worth being explicit about.
+
 ### Release build
 
 Signing material lives in `android/keystore.properties`, which is gitignored —

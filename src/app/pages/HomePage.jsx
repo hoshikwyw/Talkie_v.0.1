@@ -7,6 +7,7 @@ import { cn } from '@/shared/lib/cn'
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
 import { useBackButton } from '@/shared/platform/backButton'
 import AppHeader from '../components/AppHeader'
+import OfflineBanner from '../components/OfflineBanner'
 
 const WelcomePanel = () => (
   <div className="flex h-full flex-col items-center justify-center bg-canvas px-4">
@@ -68,6 +69,7 @@ const HomePage = () => {
     // WebView for the keyboard, which pushes the composer out of sight.
     <div className="flex h-full flex-col overflow-hidden bg-canvas">
       <AppHeader onMenuClick={() => setMenuOpen(true)} />
+      <OfflineBanner />
 
       <div className="relative flex flex-1 overflow-hidden">
         {/*

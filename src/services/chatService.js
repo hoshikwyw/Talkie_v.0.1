@@ -126,7 +126,17 @@ export async function searchUserByUsername(username, excludeUserId) {
 
 /* ----------------------------------------------------------------- writes */
 
-export async function sendMessage(chatId, currentUser, receiverUser, text) {
+/**
+ * Sends a message optimistically.
+ *
+ * @returns `{ message, settled }` — `settled` resolves when the server has
+ * acknowledged the write. Callers must not block their UI on it: with the
+ * persistent cache the write reaches the local cache synchronously, so the
+ * listener renders the message straight away, but the promise stays pending
+ * for as long as the device is offline. Awaiting it left the send button
+ * spinning until connectivity came back.
+ */
+export function sendMessage(chatId, currentUser, receiverUser, text) {
   const trimmed = text.trim()
   if (!trimmed) return null
 
@@ -139,24 +149,26 @@ export async function sendMessage(chatId, currentUser, receiverUser, text) {
     createdAt: new Date(),
   }
 
-  try {
-    await updateDoc(chatRef(chatId), { messages: arrayUnion(message) })
-  } catch (error) {
-    // The conversation document was deleted, most likely by the other party.
-    if (error.code === 'not-found') {
-      error.userMessage = 'This conversation no longer exists.'
-    }
-    throw error
-  }
+  const settled = updateDoc(chatRef(chatId), { messages: arrayUnion(message) })
+    // Summaries are transactional, and transactions need a server round trip,
+    // so they can only run once the message itself has landed.
+    .then(() =>
+      Promise.all([
+        patchChatSummary(currentUser.id, chatId, { lastMessage: trimmed, isSeen: true }),
+        receiverUser?.id
+          ? patchChatSummary(receiverUser.id, chatId, { lastMessage: trimmed, isSeen: false })
+          : null,
+      ])
+    )
+    .catch((error) => {
+      // The conversation document was deleted, most likely by the other party.
+      if (error.code === 'not-found') {
+        error.userMessage = 'This conversation no longer exists.'
+      }
+      throw error
+    })
 
-  await Promise.all([
-    patchChatSummary(currentUser.id, chatId, { lastMessage: trimmed, isSeen: true }),
-    receiverUser?.id
-      ? patchChatSummary(receiverUser.id, chatId, { lastMessage: trimmed, isSeen: false })
-      : null,
-  ])
-
-  return message
+  return { message, settled }
 }
 
 export async function markChatAsSeen(userId, chatId) {

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { IoHappyOutline, IoSend } from 'react-icons/io5'
 import { toast } from 'react-toastify'
-import { IconButton, Spinner } from '@/shared/ui'
+import { IconButton } from '@/shared/ui'
 import { cn } from '@/shared/lib/cn'
 import { useAutoResizeTextarea } from '@/shared/hooks/useAutoResizeTextarea'
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey'
@@ -11,7 +11,6 @@ import EmojiPickerPopover from './EmojiPickerPopover'
 const MessageComposer = ({ onSend, disabled = false, disabledReason }) => {
   const containerRef = useRef(null)
   const [text, setText] = useState('')
-  const [sending, setSending] = useState(false)
   const [emojiOpen, setEmojiOpen] = useState(false)
 
   const textareaRef = useAutoResizeTextarea(text)
@@ -20,23 +19,25 @@ const MessageComposer = ({ onSend, disabled = false, disabledReason }) => {
   useEscapeKey(() => setEmojiOpen(false), emojiOpen)
   useOnClickOutside(containerRef, () => setEmojiOpen(false), emojiOpen)
 
-  const handleSend = async () => {
-    if (!hasText || sending) return
+  /**
+   * Optimistic: the box clears immediately and the message appears from the
+   * local cache. Waiting for the server acknowledgement would block sending
+   * entirely while offline, because that promise does not settle until the
+   * device reconnects.
+   */
+  const handleSend = () => {
+    if (!hasText) return
 
-    const pending = text
+    const draft = text
     setText('')
-    setSending(true)
-    try {
-      await onSend(pending)
-    } catch (err) {
+    textareaRef.current?.focus()
+
+    onSend(draft)?.settled?.catch((err) => {
       console.error('Failed to send message:', err)
-      // The draft reappearing with no explanation read as the app losing it.
       toast.error(err.userMessage ?? 'Message not sent — please try again')
-      setText(pending)
-    } finally {
-      setSending(false)
-      textareaRef.current?.focus()
-    }
+      // Only restore the draft if nothing new has been typed since.
+      setText((current) => current || draft)
+    })
   }
 
   if (disabled) {
@@ -92,7 +93,7 @@ const MessageComposer = ({ onSend, disabled = false, disabledReason }) => {
           <button
             type="button"
             onClick={handleSend}
-            disabled={!hasText || sending}
+            disabled={!hasText}
             aria-label="Send message"
             className={cn(
               'm-1.5 flex-shrink-0 rounded-full p-2 transition-all active:scale-90',
@@ -100,7 +101,7 @@ const MessageComposer = ({ onSend, disabled = false, disabledReason }) => {
               'disabled:cursor-not-allowed'
             )}
           >
-            {sending ? <Spinner size={18} /> : <IoSend size={18} />}
+            <IoSend size={18} />
           </button>
         </div>
       </div>

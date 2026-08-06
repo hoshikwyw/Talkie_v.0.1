@@ -1,6 +1,11 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore'
 
 /**
  * Firebase client only. Anything that reads or writes application data belongs
@@ -31,5 +36,29 @@ import('firebase/analytics')
   })
   .catch(() => {})
 
+/**
+ * Firestore with an on-disk cache.
+ *
+ * A phone loses connectivity constantly, and without this the app opens to an
+ * empty conversation list every time it happens. With it, cached conversations
+ * render immediately and writes made offline are queued and replayed on
+ * reconnect.
+ *
+ * The multi-tab manager keeps several browser tabs sharing one cache; without
+ * it only the first tab gets persistence. It needs IndexedDB, so fall back to
+ * the in-memory default where that is unavailable (private windows, embedded
+ * WebViews with storage disabled) rather than losing Firestore entirely.
+ */
+function createFirestore() {
+  try {
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    })
+  } catch (err) {
+    console.error('Persistent cache unavailable, using memory only:', err)
+    return getFirestore(app)
+  }
+}
+
 export const auth = getAuth(app)
-export const db = getFirestore(app)
+export const db = createFirestore()

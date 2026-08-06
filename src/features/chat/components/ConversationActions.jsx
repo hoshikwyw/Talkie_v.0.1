@@ -39,7 +39,7 @@ const ConversationActions = () => {
       toast.success('Conversation deleted')
     } catch (err) {
       console.error('Failed to delete conversation:', err)
-      toast.error('Failed to delete')
+      toast.error(navigator.onLine ? 'Failed to delete' : 'Cannot delete while offline')
     } finally {
       setBusy(false)
     }

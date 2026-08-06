@@ -36,7 +36,9 @@ const MessageBubble = ({ message, isOwn, senderName, senderAvatar, endsRun, onDe
       toast.success('Message deleted')
     } catch (err) {
       console.error('Failed to delete message:', err)
-      toast.error('Failed to delete')
+      // Deleting runs in a transaction, which needs the server — unlike
+      // sending, it cannot be queued for later.
+      toast.error(navigator.onLine ? 'Failed to delete' : 'Cannot delete while offline')
     } finally {
       setDeleting(false)
       setMenuOpen(false)
